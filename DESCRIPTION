@@ -7,7 +7,7 @@ Maintainer: Nick Golding <nick.golding.research@gmail.com>
 Description: A greta extension module providing functions for analysing transition matrices representing dynamical systems.
 License: Apache License 2.0
 Imports: tensorflow
-Depends: greta
+Depends: greta (>= 0.2.1)
 Suggests: testthat
 Encoding: UTF-8
 LazyData: true
