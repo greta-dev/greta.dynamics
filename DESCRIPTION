@@ -2,6 +2,7 @@ Package: gretaDynamics
 Type: Package
 Title: Modelling Structured Dynamical Systems in greta
 Version: 0.1.0
+Date: 2017-08-19
 Author: Nick Golding
 Maintainer: Nick Golding <nick.golding.research@gmail.com>
 Description: A greta extension module providing functions for analysing transition matrices representing dynamical systems.
