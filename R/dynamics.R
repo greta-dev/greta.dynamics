@@ -1,7 +1,7 @@
 # methods for using stage-structured (matrix) population models using greta
 # dynamics module
 
-op <- greta::.internals$nodes$helpers$op
+op <- greta::.internals$nodes$constructors$op
 
 # tensorflow code
 # iterate matrix tensor `mat` `niter` times, each time using and updating vector
