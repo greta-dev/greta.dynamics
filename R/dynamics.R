@@ -179,8 +179,8 @@ iterate_state <- function(matrix, state, niter) {
 #'   representing transition probabilities between states
 #' @param state a column vector greta array representing the initial state from
 #'   which to iterate the matrix
-#' @param niter a positive integer giving the number of times to iterate the
-#'   matrix
+#' @param niter a vector of positive integers giving the time steps at which to
+#'   calculate the iterated state
 #'
 #' @export
 iterate_state_seq <- function(matrix, state, niter) {
