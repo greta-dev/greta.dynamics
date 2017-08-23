@@ -3,7 +3,6 @@
 export(iterate_lambda)
 export(iterate_lambda_vectorised)
 export(iterate_state)
-export(iterate_state_seq)
 import(greta)
 importFrom(tensorflow,shape)
 importFrom(tensorflow,tf)
