@@ -25,7 +25,7 @@ tf_iterate_lambda <- function (mat, state, niter) {
 # tensor `state`, and return the final state
 tf_iterate_state <- function (mat, state, niter) {
 
-  # store states (can't overwrite since we need to maintain the chain of nodes)
+    # store states (can't overwrite since we need to maintain the chain of nodes)
   states <- list(state)
 
   # iterate the matrix
