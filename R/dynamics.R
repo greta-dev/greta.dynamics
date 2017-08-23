@@ -37,6 +37,23 @@ tf_iterate_state <- function (mat, state, niter) {
 
 }
 
+# iterate matrix tensor `mat` `niter` times, each time using and updating vector
+# tensor `state`, and return the final state
+tf_iterate_state_seq <- function (mat, state, niter) {
+
+  # store states (can't overwrite since we need to maintain the chain of nodes)
+  states <- list(state)
+
+  # iterate the matrix
+  iter_tmp <- ifelse(length(niter) > 1, niter, seq_len(niter))
+  for (i in iter_tmp)
+    states[[i + 1]] <-  tf$matmul(mat, states[[i]], transpose_a = TRUE)
+
+  # return the final growth rate (should be same for all states at convergence)
+  states[niter + 1]
+
+}
+
 # apply iterate_lambda to a series of n matrices of dimension m, stored as an n
 # x m^2 matrix, each row being unpacked *rowwise*
 tf_iterate_lambda_vectorised <- function (mat, state, n, m, niter) {
@@ -147,6 +164,52 @@ iterate_state <- function(matrix, state, niter) {
   }
 
   op('iterate_state',
+     matrix,
+     state,
+     operation_args = list(niter = niter),
+     tf_operation = tf_iterate_state,
+     dimfun = dimfun)
+
+}
+
+#' @name iterate_state_seq
+#' @rdname gretaDynamics
+#'
+#' @param matrix a square, two-dimensional (i.e. matrix-like) greta array
+#'   representing transition probabilities between states
+#' @param state a column vector greta array representing the initial state from
+#'   which to iterate the matrix
+#' @param niter a positive integer giving the number of times to iterate the
+#'   matrix
+#'
+#' @export
+iterate_state_seq <- function(matrix, state, niter) {
+
+  niter <- as.integer(niter)
+
+  dimfun <- function(elem_list) {
+
+    # input dimensions
+    matrix_dim <- dim(elem_list[[1]])
+    state_dim <- dim(elem_list[[2]])
+
+    if (length(state_dim) != 2 | state_dim[2] != 1)
+      stop ('state must be a column vector greta array',
+            call. = FALSE)
+
+    if (length(matrix_dim) != 2 | matrix_dim[1] != matrix_dim[2])
+      stop ('matrix must be a two-dimensional square greta array',
+            call. = FALSE)
+
+    if (matrix_dim[2] != state_dim[1])
+      stop ('number of elements in state must match the dimension of matrix',
+            call. = FALSE)
+
+    # output dimensions
+    state_dim
+  }
+
+  op('iterate_state_seq',
      matrix,
      state,
      operation_args = list(niter = niter),
