@@ -21,8 +21,8 @@ tf_iterate_lambda <- function (mat, state, niter) {
 
 }
 
-# iterate matrix tensor `mat` `niter` times, each time using and updating vector
-# tensor `state`, and return the final state
+# iterate matrix tensor `mat` `max(niter)` times, each time using and updating vector
+# tensor `state`, and return states corresponding to niter
 tf_iterate_state <- function (mat, state, niter) {
 
     # store states (can't overwrite since we need to maintain the chain of nodes)
@@ -116,8 +116,8 @@ NULL
 #'   representing transition probabilities between states
 #' @param state a column vector greta array representing the initial state from
 #'   which to iterate the matrix
-#' @param niter a positive integer giving the number of times to iterate the
-#'   matrix
+#' @param niter a (vector of) positive integer giving the time points at which
+#'   to calculate the iterated matrix
 #'
 #' @export
 iterate_state <- function(matrix, state, niter) {
