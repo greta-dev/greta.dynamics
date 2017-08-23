@@ -50,7 +50,7 @@ tf_iterate_state_seq <- function (mat, state, niter) {
     states[[i + 1]] <-  tf$matmul(mat, states[[i]], transpose_a = TRUE)
 
   # return the final growth rate (should be same for all states at convergence)
-  states[niter + 1]
+  states
 
 }
 
@@ -206,14 +206,14 @@ iterate_state_seq <- function(matrix, state, niter) {
             call. = FALSE)
 
     # output dimensions
-    state_dim
+    c(state_dim[1], length(niter))
   }
 
   op('iterate_state_seq',
      matrix,
      state,
      operation_args = list(niter = niter),
-     tf_operation = tf_iterate_state,
+     tf_operation = tf_iterate_state_seq,
      dimfun = dimfun)
 
 }
