@@ -23,16 +23,30 @@ tf_iterate_lambda <- function (mat, state, niter) {
 
 # iterate matrix tensor `mat` `max(niter)` times, each time using and updating vector
 # tensor `state`, and return states corresponding to niter
-tf_iterate_state <- function (mat, state, niter) {
+tf_iterate_state <- function (mat, state,
+                              dens_param,
+                              niter,
+                              dens_form) {
 
-    # store states (can't overwrite since we need to maintain the chain of nodes)
+  # store states (can't overwrite since we need to maintain the chain of nodes)
   states <- list(state)
 
   # iterate the matrix
-  for (i in seq_len(max(niter)))
-    states[[i + 1]] <-  tf$matmul(mat, states[[i]], transpose_a = TRUE)
+  for (i in seq_len(max(niter))) {
 
-  # return the final growth rate (should be same for all states at convergence)
+    # include density dependence
+    nkm1 <- tf$reduce_sum(states[[i]])
+    scale_factor <- switch(dens_form,
+                           "bh" = (nkm1 / (1 + dens_param * nkm1)),
+                           "ricker" = (nkm1 * exp(-dens_param * nkm1)),
+                           1)
+
+    # update state
+    mat_tmp <- scale_factor * mat
+    states[[i + 1]] <-  tf$matmul(mat_tmp, states[[i]], transpose_a = TRUE)
+  }
+
+  # return the final state
   do.call(greta::.internals$tensors$tf_cbind, states[niter + 1])
 
 }
@@ -120,7 +134,10 @@ NULL
 #'   to calculate the iterated matrix
 #'
 #' @export
-iterate_state <- function(matrix, state, niter) {
+iterate_state <- function(matrix, state,
+                          dens_param,
+                          niter,
+                          dens_form) {
 
   niter <- as.integer(niter)
 
@@ -149,7 +166,9 @@ iterate_state <- function(matrix, state, niter) {
   op('iterate_state',
      matrix,
      state,
-     operation_args = list(niter = niter),
+     dens_param,
+     operation_args = list(niter = niter,
+                           dens_form = dens_form),
      tf_operation = tf_iterate_state,
      dimfun = dimfun)
 

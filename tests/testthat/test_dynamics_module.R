@@ -34,19 +34,24 @@ test_that('state iteration works', {
   n <- 10
   mat <- randu(n, n)
   init <- rep(1, n)
+  dens_param <- 1
   niter <- 50
 
   # r version
   target_state <- it_state(matrix = mat,
                            state = init,
-                           niter = niter)
+                           dens_param = dens_param,
+                           niter = niter,
+                           dens_form = "none")
   target_state <- target_state / sum(target_state)
 
   # greta version
   state <- iterate_state(matrix = mat,
                          state = init,
-                         niter = niter)
-  greta_state <- grab(state)[, 1]
+                         dens_param = dens_param,
+                         niter = seq_len(niter),
+                         dens_form = "none")
+  greta_state <- grab(state[, niter])
   greta_state <- greta_state / sum(greta_state)
 
   difference <- abs(greta_state - target_state)

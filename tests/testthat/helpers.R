@@ -35,8 +35,21 @@ it_lambda <- function (matrix, state, niter) {
   states[[niter + 1]][1] / states[[niter]][1]
 }
 
-it_state <- function (matrix, state, niter) {
-  for (i in seq_len(niter))
-    state <- state %*% matrix
+it_state <- function (matrix, state,
+                      dens_param,
+                      niter,
+                      dens_form) {
+  for (i in seq_len(niter)) {
+    # include density dependence
+    nkm1 <- sum(state)
+    scale_factor <- switch(dens_form,
+                           "bh" = (nkm1 / (1 + dens_param * nkm1)),
+                           "ricker" = (nkm1 * exp(-dens_param * nkm1)),
+                           1)
+
+    # update state
+    mat_tmp <- scale_factor * matrix
+    state <- state %*% mat_tmp
+  }
   state[1, ]
 }
