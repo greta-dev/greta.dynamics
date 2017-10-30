@@ -37,12 +37,16 @@ tf_iterate_state <- function (mat, state,
     # include density dependence
     nkm1 <- tf$reduce_sum(states[[i]])
     scale_factor <- switch(dens_form,
-                           "bh" = (nkm1 / (1 + dens_param * nkm1)),
-                           "ricker" = (nkm1 * exp(-dens_param * nkm1)),
-                           1)
+                           "bh" = tf$divide(nkm1, tf$add(tf$constant(1, dtype = tf$float32),
+                                                         tf$multiply(dens_param, nkm1))),
+                           "ricker" = tf$multiply(nkm1,
+                                                  tf$exp(tf$multiply(tf$multiply(tf$constant(-1, dtype = tf$float32),
+                                                                                 dens_param),
+                                                                     nkm1))),
+                           tf$constant(1, dtype = tf$float32))
 
     # update state
-    mat_tmp <- scale_factor * mat
+    mat_tmp <- tf$multiply(scale_factor, mat)
     states[[i + 1]] <-  tf$matmul(mat_tmp, states[[i]], transpose_a = TRUE)
   }
 
