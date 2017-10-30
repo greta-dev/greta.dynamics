@@ -1,9 +1,11 @@
 # test functions
 
+library(tensorflow)
+
 # set the seed before running tests
 set.seed(2017-05-01)
 
-dag_class <- greta::.internals$samplers$dag_class
+dag_class <- greta::.internals$inference$dag_class
 
 # evaluate a greta_array, node, or tensor
 grab <- function (x) {
