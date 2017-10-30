@@ -37,6 +37,7 @@ test_that('state iteration works', {
   dens_param <- 1
   niter <- 50
 
+  ## no density dependence
   # r version
   target_state <- it_state(matrix = mat,
                            state = init,
@@ -53,6 +54,50 @@ test_that('state iteration works', {
                          dens_form = "none")
   greta_state <- grab(state[, niter])
   greta_state <- greta_state / sum(greta_state)
+
+  difference <- abs(greta_state - target_state)
+  expect_true(all(difference < 1e-6))
+
+  ## Beverton-Holt density dependence
+  # r version
+  target_state <- it_state(matrix = mat,
+                           state = init,
+                           dens_param = dens_param,
+                           niter = niter,
+                           dens_form = "bh")
+  target_state <- target_state / sum(target_state)
+
+  # greta version
+  state <- iterate_state(matrix = mat,
+                         state = init,
+                         dens_param = dens_param,
+                         niter = seq_len(niter),
+                         dens_form = "bh")
+  greta_state <- grab(state[, niter])
+  greta_state <- greta_state / sum(greta_state)
+
+  difference <- abs(greta_state - target_state)
+  expect_true(all(difference < 1e-6))
+
+  ## Ricker density dependence
+  # r version
+  target_state <- it_state(matrix = mat,
+                           state = init,
+                           dens_param = dens_param,
+                           niter = niter,
+                           dens_form = "ricker")
+  if (sum(target_state) > 0)
+    target_state <- target_state / sum(target_state)
+
+  # greta version
+  state <- iterate_state(matrix = mat,
+                         state = init,
+                         dens_param = dens_param,
+                         niter = seq_len(niter),
+                         dens_form = "ricker")
+  greta_state <- grab(state[, niter])
+  if (sum(greta_state) > 0)
+    greta_state <- greta_state / sum(greta_state)
 
   difference <- abs(greta_state - target_state)
   expect_true(all(difference < 1e-6))
