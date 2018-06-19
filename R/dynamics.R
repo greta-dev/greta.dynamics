@@ -21,20 +21,38 @@ tf_iterate_lambda <- function (mat, state, niter) {
 
 }
 
-# iterate matrix tensor `mat` `niter` times, each time using and updating vector
-# tensor `state`, and return the final state
-tf_iterate_state <- function (mat, state, niter) {
-
+# iterate matrix tensor `mat` `max(niter)` times, each time using and updating vector
+# tensor `state`, and return states corresponding to niter
+tf_iterate_state <- function (mat, state,
+                              dens_param,
+                              niter,
+                              dens_form) {
+  
   # store states (can't overwrite since we need to maintain the chain of nodes)
   states <- list(state)
-
+  
   # iterate the matrix
-  for (i in seq_len(niter))
-    states[[i + 1]] <-  tf$matmul(mat, states[[i]], transpose_a = TRUE)
-
-  # return the final growth rate (should be same for all states at convergence)
-  states[[niter + 1]]
-
+  for (i in seq_len(max(niter))) {
+    
+    # include density dependence
+    nkm1 <- tf$reduce_sum(states[[i]])
+    scale_factor <- switch(dens_form,
+                           "bh" = tf$divide(nkm1, tf$add(tf$constant(1, dtype = tf$float32),
+                                                         tf$multiply(dens_param, nkm1))),
+                           "ricker" = tf$multiply(nkm1,
+                                                  tf$exp(tf$multiply(tf$multiply(tf$constant(-1, dtype = tf$float32),
+                                                                                 dens_param),
+                                                                     nkm1))),
+                           tf$constant(1, dtype = tf$float32))
+    
+    # update state
+    mat_tmp <- tf$multiply(scale_factor, mat)
+    states[[i + 1]] <-  tf$matmul(mat_tmp, states[[i]], transpose_a = TRUE)
+  }
+  
+  # return the final state
+  do.call(greta::.internals$tensors$tf_cbind, states[niter + 1])
+  
 }
 
 # apply iterate_lambda to a series of n matrices of dimension m, stored as an n
@@ -116,43 +134,50 @@ NULL
 #'   representing transition probabilities between states
 #' @param state a column vector greta array representing the initial state from
 #'   which to iterate the matrix
+#' @param dens_param details
 #' @param niter a positive integer giving the number of times to iterate the
 #'   matrix
+#' @param dens_form details
 #'
 #' @export
-iterate_state <- function(matrix, state, niter) {
-
+iterate_state <- function(matrix, state,
+                          dens_param,
+                          niter,
+                          dens_form) {
+  
   niter <- as.integer(niter)
-
+  
   dimfun <- function(elem_list) {
-
+    
     # input dimensions
     matrix_dim <- dim(elem_list[[1]])
     state_dim <- dim(elem_list[[2]])
-
+    
     if (length(state_dim) != 2 | state_dim[2] != 1)
       stop ('state must be a column vector greta array',
             call. = FALSE)
-
+    
     if (length(matrix_dim) != 2 | matrix_dim[1] != matrix_dim[2])
       stop ('matrix must be a two-dimensional square greta array',
             call. = FALSE)
-
+    
     if (matrix_dim[2] != state_dim[1])
       stop ('number of elements in state must match the dimension of matrix',
             call. = FALSE)
-
+    
     # output dimensions
-    state_dim
+    c(state_dim[1], length(niter))
   }
-
+  
   op('iterate_state',
      matrix,
      state,
-     operation_args = list(niter = niter),
+     dens_param,
+     operation_args = list(niter = niter,
+                           dens_form = dens_form),
      tf_operation = tf_iterate_state,
      dimfun = dimfun)
-
+  
 }
 
 #' @name iterate_lambda
