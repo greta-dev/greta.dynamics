@@ -1,4 +1,4 @@
-Package: gretaDynamics
+Package: greta.dynamics
 Type: Package
 Title: Modelling Structured Dynamical Systems in greta
 Version: 0.1.0
