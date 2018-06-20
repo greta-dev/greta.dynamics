@@ -190,7 +190,7 @@ iterate_lambda <- function(matrix, state, niter) {
      matrix,
      state,
      operation_args = list(niter = niter),
-     tf_operation = 'tf_iterate_lambda',
+     tf_operation = 'greta.dynamics:::tf_iterate_lambda',
      dimfun = dimfun)
 
 }
@@ -241,7 +241,7 @@ iterate_lambda_vectorised <- function(matrices, state, n, m, niter) {
      operation_args = list(n = n,
                            m = m,
                            niter = niter),
-     tf_operation = 'tf_iterate_lambda_vectorised',
+     tf_operation = 'greta.dynamics:::tf_iterate_lambda_vectorised',
      dimfun = dimfun)
 
 }
