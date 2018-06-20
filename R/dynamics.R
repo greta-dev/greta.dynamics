@@ -23,31 +23,13 @@ tf_iterate_lambda <- function (mat, state, niter) {
 
 # iterate matrix tensor `mat` `max(niter)` times, each time using and updating vector
 # tensor `state`, and return states corresponding to niter
-tf_iterate_state <- function (mat, state,
-                              # dens_param,
-                              niter) {#,
-                              # dens_form) {
+tf_iterate_state <- function (mat, state, niter) {
   
   # store states (can't overwrite since we need to maintain the chain of nodes)
   states <- list(state)
   
   # iterate the matrix
   for (i in seq_len(max(niter))) {
-    
-    # include density dependence
-    nkm1 <- tf$reduce_sum(states[[i]])
-    # scale_factor <- switch(dens_form,
-    #                        "bh" = tf$divide(nkm1, tf$add(tf$constant(1, dtype = tf$float32),
-    #                                                      tf$multiply(dens_param, nkm1))),
-    #                        "ricker" = tf$multiply(nkm1,
-    #                                               tf$exp(tf$multiply(tf$multiply(tf$constant(-1, dtype = tf$float32),
-    #                                                                              dens_param),
-    #                                                                  nkm1))),
-    #                        tf$constant(1, dtype = tf$float32))
-    
-    # update state
-    # mat_tmp <- tf$multiply(scale_factor, mat)
-    # states[[i + 1]] <-  tf$matmul(mat_tmp, states[[i]], transpose_a = TRUE)
     states[[i + 1]] <- tf$matmul(mat, states[[i]], transpose_a = TRUE)
   }
   
@@ -140,9 +122,7 @@ NULL
 #'
 #' @export
 iterate_state <- function(matrix, state,
-                          # dens_param,
-                          niter) { #,
-                          # dens_form) {
+                          niter) {
   
   niter <- as.integer(niter)
   
@@ -171,10 +151,8 @@ iterate_state <- function(matrix, state,
   op('iterate_state',
      matrix,
      state,
-     # dens_param,
-     operation_args = list(niter = niter),#,
-                           # dens_form = dens_form),
-     tf_operation = tf_iterate_state,
+     operation_args = list(niter = niter),
+     tf_operation = 'tf_iterate_state',
      dimfun = dimfun)
   
 }
@@ -212,7 +190,7 @@ iterate_lambda <- function(matrix, state, niter) {
      matrix,
      state,
      operation_args = list(niter = niter),
-     tf_operation = tf_iterate_lambda,
+     tf_operation = 'tf_iterate_lambda',
      dimfun = dimfun)
 
 }
@@ -263,7 +241,7 @@ iterate_lambda_vectorised <- function(matrices, state, n, m, niter) {
      operation_args = list(n = n,
                            m = m,
                            niter = niter),
-     tf_operation = tf_iterate_lambda_vectorised,
+     tf_operation = 'tf_iterate_lambda_vectorised',
      dimfun = dimfun)
 
 }
