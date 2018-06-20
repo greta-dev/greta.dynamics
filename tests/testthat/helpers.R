@@ -38,7 +38,8 @@ it_lambda <- function (matrix, state, niter) {
 }
 
 it_state <- function (matrix, state, niter) {
-  for (i in seq_len(niter))
-    state <- state %*% matrix
-  state[1, ]
+  states <- matrix(NA, nrow = length(state), ncol = niter)
+  for (i in seq_len(max(niter)))
+    states[, (i + 1)] <- states[, i] %*% matrix
+  states[1, ]
 }

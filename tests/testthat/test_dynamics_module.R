@@ -34,7 +34,7 @@ test_that('state iteration works', {
   n <- 10
   mat <- randu(n, n)
   init <- rep(1, n)
-  niter <- 50
+  niter <- 10
 
   # r version
   target_state <- it_state(matrix = mat,

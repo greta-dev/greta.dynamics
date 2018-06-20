@@ -6,6 +6,12 @@ dist: trusty
 r_packages:
   - testthat
   - covr
+  - reticulate
+  - tensorflow
+  - R6
+  - coda
+  - knitr
+  - rmarkdown
 
 r_github_packages:
   - greta-dev/greta/tree/dev
@@ -29,7 +35,6 @@ addons:
       - libv8-dev
 
 before_install:
-  - pip install --upgrade pip
   - pip install --user numpy
   - pip install --user tensorflow
 
