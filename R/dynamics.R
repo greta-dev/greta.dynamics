@@ -152,7 +152,7 @@ iterate_state <- function(matrix, state,
      matrix,
      state,
      operation_args = list(niter = niter),
-     tf_operation = 'tf_iterate_state',
+     tf_operation = 'greta.dynamics:::tf_iterate_state',
      dimfun = dimfun)
   
 }
