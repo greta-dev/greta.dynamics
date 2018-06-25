@@ -23,14 +23,30 @@ tf_iterate_lambda <- function (mat, state, niter) {
 
 # iterate matrix tensor `mat` `max(niter)` times, each time using and updating vector
 # tensor `state`, and return states corresponding to niter
-tf_iterate_state <- function (mat, state, niter) {
+tf_iterate_state <- function (mat, state, dens_param, niter, dens_form) {
   
   # store states (can't overwrite since we need to maintain the chain of nodes)
   states <- list(state)
   
   # iterate the matrix
   for (i in seq_len(max(niter))) {
-    states[[i + 1]] <- tf$matmul(mat, states[[i]], transpose_a = TRUE)
+    
+    # include density dependence
+    nkm1 <- tf$reduce_sum(states[[i]])
+    scale_factor <- switch(dens_form,
+                           'bh' = tf$divide(nkm1, tf$add(tf$constant(1, dtype = tf$float32),
+                                                         tf$multiply(dens_param, nkm1))),
+                           'ricker' = tf$multiply(nkm1,
+                                                  tf$exp(tf$multiply(tf$multiply(tf$constant(-1, dtype = tf$float32),
+                                                                                 dens_param),
+                                                                     nkm1))),
+                           tf$constant(1, dtype = tf$float32))
+    
+    # incorporate density dependence
+    mat_tmp <- tf$multiply(scale_factor, mat)
+    
+    # update state
+    states[[i + 1]] <- tf$matmul(mat_tmp, states[[i]], transpose_a = TRUE)
   }
   
   # return the final state
@@ -121,8 +137,8 @@ NULL
 #'   matrix
 #'
 #' @export
-iterate_state <- function(matrix, state,
-                          niter) {
+iterate_state <- function(matrix, state, dens_param,
+                          niter, dens_form) {
   
   niter <- as.integer(niter)
   
@@ -151,7 +167,9 @@ iterate_state <- function(matrix, state,
   op('iterate_state',
      matrix,
      state,
-     operation_args = list(niter = niter),
+     dens_param,
+     operation_args = list(niter = niter,
+                           dens_form = dens_form),
      tf_operation = 'greta.dynamics:::tf_iterate_state',
      dimfun = dimfun)
   
