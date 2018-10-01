@@ -90,7 +90,7 @@ tf_iterate_lambda_vectorised <- function (mat, state, n, m, niter) {
 
 }
 
-#' @name gretaDynamics
+#' @name greta.dynamics
 #' @title iterate transition matrices
 #'
 #' @description greta functions to calculate the intrinsic growth rate or stable
@@ -110,7 +110,7 @@ tf_iterate_lambda_vectorised <- function (mat, state, n, m, niter) {
 NULL
 
 #' @name iterate_state
-#' @rdname gretaDynamics
+#' @rdname greta.dynamics
 #'
 #' @param matrix a square, two-dimensional (i.e. matrix-like) greta array
 #'   representing transition probabilities between states
@@ -156,7 +156,7 @@ iterate_state <- function(matrix, state, niter) {
 }
 
 #' @name iterate_lambda
-#' @rdname gretaDynamics
+#' @rdname greta.dynamics
 #' @export
 iterate_lambda <- function(matrix, state, niter) {
 
@@ -194,7 +194,7 @@ iterate_lambda <- function(matrix, state, niter) {
 }
 
 #' @name iterate_lambda_vectorised
-#' @rdname gretaDynamics
+#' @rdname greta.dynamics
 #'
 #' @param matrices a rectangular two-dimensional greta array of dimension n x
 #'   m^2, each row of which gives the rowwise elements of a different m x m

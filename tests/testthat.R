@@ -1,3 +1,3 @@
 library(testthat)
 
-test_check("gretaDynamics")
+test_check("greta.dynamics")
