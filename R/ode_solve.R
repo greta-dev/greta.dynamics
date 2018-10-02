@@ -13,12 +13,15 @@
 #' @param times a column vector of times at which to evaluate y
 #' @param ... named arguments giving greta arrays for the additional (fixed)
 #'   parameters
+#' @param method which solver to use. \code{"ode45"} uses adaptive step
+#'   sizes, whilst \code{"rk4"} and \code{"midpoint"} use the fixed grid defined
+#'   by \code{times}; they may be faster but less accurate than \code{"ode45"}.
 #'
 #' @export
 #'
 #' @examples
 #' \dontrun{
-#' # replicate the ODE example from deSolve
+#' # replicate the Lotka-Volterra example from deSolve
 #' library (deSolve)
 #' LVmod <- function(Time, State, Pars) {
 #'   with(as.list(c(State, Pars)), {
@@ -101,9 +104,11 @@
 #' o <- opt(m)
 #' o
 #' }
-ode_solve <- function (derivative, y0, times, ...) {
+ode_solve <- function (derivative, y0, times, ...,
+                       method = c("ode45", "rk4", "midpoint")) {
 
   times <- as.greta_array(times)
+  method <- match.arg(method)
 
   # check times is a column vector
   t_dim <- dim(times)
@@ -136,7 +141,8 @@ ode_solve <- function (derivative, y0, times, ...) {
   op("ode", y0, times, ...,
      dim = dims,
      tf_operation = "tf_ode_solve",
-     operation_args = list(tf_derivative = tf_derivative))
+     operation_args = list(tf_derivative = tf_derivative,
+                           method = method))
 
 }
 
@@ -146,7 +152,7 @@ as_tf_function <- greta::.internals$utils$greta_array_operations$as_tf_function
 # internal tf function wrapping the core TF method
 # return a tensor for the integral of derivative evaluated at times, given
 # starting state y0 and other parameters dots
-tf_ode_solve <- function(y0, times, ..., tf_derivative) {
+tf_ode_solve <- function(y0, times, ..., tf_derivative, method) {
 
   # drop the columns and batch dimension in times
   times <- tf_flatten(times)
@@ -160,9 +166,19 @@ tf_ode_solve <- function(y0, times, ..., tf_derivative) {
   # integrate - need to run this with the dag's TF graph as default, so that
   # tf_derivative creates tensors correctly
   dag <- parent.frame()$dag
-  dag$on_graph(
-    integral <- tf$contrib$integrate$odeint(tf_derivative, y0, times)
-  )
+
+  tf_int <- tf$contrib$integrate
+
+  integrator <- switch(method,
+                       ode45 = tf_int$odeint,
+                       rk4 = function (...) {
+                         tf_int$odeint_fixed(..., method = "rk4")
+                       },
+                       midpoint = function (...) {
+                         tf_int$odeint_fixed(..., method = "midpoint")
+                       })
+
+  dag$on_graph( integral <- integrator(tf_derivative, y0, times) )
 
   # reshape to put batch dimension first
   permutation <- seq_along(dim(integral)) - 1L

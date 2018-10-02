@@ -19,17 +19,7 @@ test_that('ode_solve works like deSolve::ode', {
     })
   }
 
-  pars  <- c(rIng   = 0.2,    # /day, rate of ingestion
-             rGrow  = 1.0,    # /day, growth rate of prey
-             rMort  = 0.2 ,   # /day, mortality rate of predator
-             assEff = 0.5,    # -, assimilation efficiency
-             K      = 10)     # mmol/m3, carrying capacity
-
-  yini <- c(Prey = 1, Predator = 2)
-  times <- seq(0, 200, by = 1)
-  r_out <- deSolve::ode(yini, times, LVmod, pars)
-
-  # greta version of the function
+  # greta version of the model
   lotka_volterra <- function(y, t, rIng, rGrow, rMort, assEff, K) {
     Prey <- y[1, 1]
     Predator <- y[1, 2]
@@ -44,19 +34,42 @@ test_that('ode_solve works like deSolve::ode', {
     cbind(dPrey, dPredator)
   }
 
-  # solution to the ODE
-  y <- ode_solve(lotka_volterra, y0 = t(yini),
-                 times,
-                 rIng = pars["rIng"],
-                 rGrow = pars["rGrow"],
-                 rMort = pars["rMort"],
-                 assEff = pars["assEff"],
-                 K = pars["K"])
+  pars  <- c(rIng   = 0.2,    # /day, rate of ingestion
+             rGrow  = 1.0,    # /day, growth rate of prey
+             rMort  = 0.2 ,   # /day, mortality rate of predator
+             assEff = 0.5,    # -, assimilation efficiency
+             K      = 10)     # mmol/m3, carrying capacity
 
-  g_out <- cbind(times, y)
+  yini <- c(Prey = 1, Predator = 2)
+  times <- seq(0, 200, by = 1)
 
-  greta_out <- calculate(g_out)
-  difference <- abs(greta_out - r_out)
-  expect_true(all(difference < 1e-4))
+  # loop through the solvers (ode45 should be similar to the dopri5 method in TF)
+  methods <- c("ode45", "rk4", "midpoint")
+
+  for (method in methods) {
+
+    deSolve_method <- method
+
+    if (deSolve_method == "midpoint")
+      deSolve_method <- rk_midpoint
+
+    r_out <- deSolve::ode(yini, times, LVmod, pars,
+                          method = deSolve_method)
+
+    y <-  ode_solve(lotka_volterra, y0 = t(yini),
+                    times,
+                    rIng = pars["rIng"],
+                    rGrow = pars["rGrow"],
+                    rMort = pars["rMort"],
+                    assEff = pars["assEff"],
+                    K = pars["K"],
+                    method = method)
+    g_out <- cbind(times, y)
+
+    greta_out <- calculate(g_out)
+    difference <- abs(greta_out - r_out)
+    expect_true(all(difference < 1e-4))
+
+  }
 
 })

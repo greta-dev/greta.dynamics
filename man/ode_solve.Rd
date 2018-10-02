@@ -4,7 +4,8 @@
 \alias{ode_solve}
 \title{solve ODEs}
 \usage{
-ode_solve(derivative, y0, times, ...)
+ode_solve(derivative, y0, times, ..., method = c("ode45", "rk4",
+  "midpoint"))
 }
 \arguments{
 \item{derivative}{a derivative function. The first two arguments must be 'y'
@@ -19,13 +20,17 @@ the function.}
 
 \item{...}{named arguments giving greta arrays for the additional (fixed)
 parameters}
+
+\item{method}{which solver to use. \code{"ode45"} uses adaptive step
+sizes, whilst \code{"rk4"} and \code{"midpoint"} use the fixed grid defined
+by \code{times}; they may be faster but less accurate than \code{"ode45"}.}
 }
 \description{
 Solve a system of ordinary differential equations.
 }
 \examples{
 \dontrun{
-# replicate the ODE example from deSolve
+# replicate the Lotka-Volterra example from deSolve
 library (deSolve)
 LVmod <- function(Time, State, Pars) {
   with(as.list(c(State, Pars)), {

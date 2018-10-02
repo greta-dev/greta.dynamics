@@ -28,3 +28,11 @@ r_iterate_matrix <- function (matrix, state, niter) {
        all_states = all_states)
 }
 
+# a midpoint solver for use in deSolve, from the vignette p8
+rk_midpoint <- deSolve::rkMethod(ID = "midpoint",
+                                 varstep = FALSE,
+                                 A = c(0, 1/2),
+                                 b1 = c(0, 1),
+                                 c = c(0, 1/2),
+                                 stage = 2,
+                                 Qerr = 1)
