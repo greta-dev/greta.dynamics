@@ -1,4 +1,4 @@
-context('iteratation functions')
+context('iteration functions')
 
 test_that('single iteration works', {
 

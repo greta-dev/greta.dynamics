@@ -6,6 +6,7 @@ dist: trusty
 r_packages:
   - testthat
   - covr
+  - deSolve
 
 r_github_packages:
   - greta-dev/greta@dev
