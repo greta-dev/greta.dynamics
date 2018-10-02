@@ -25,13 +25,15 @@
 #' @param niter a positive integer giving the number of times to iterate the
 #'   matrix
 #'
-#' @return a named list with two greta arrays: \code{lambda} a scalar or vector
-#'   giving the ratio of the first stage values between the final two
-#'   iterations, and \code{final_state} a vector or matrix (with the same
+#' @return a named list with three greta arrays: \code{lambda} a scalar or
+#'   vector giving the ratio of the first stage values between the final two
+#'   iterations, \code{stable_state} a vector or matrix (with the same
 #'   dimensions as \code{initial_state}) giving the state after the final
-#'   iteration. If the system has convreged in \code{niter} iterations, these
-#'   correspond to the asymptotic growth rate and stable stage distribution
-#'   respectively.
+#'   iteration, normalised so that the values for all stages sum to one, and
+#'   \code{all_states} an n x m x niter matrix of the state values at each
+#'   iteration. If the system has converged in \code{niter} iterations,
+#'   \code{lambda} and \code{stable_state} correspond to the asymptotic growth
+#'   rate and stable stage distribution respectively.
 #'
 #' @export
 #'
@@ -60,10 +62,9 @@
 #'
 #' # analyse this to get the intrinsic growth rate and stable state
 #' iterations <- iterate_matrix(tmat)
-#' growth_rate <- iterations$lambda
-#' # rescale to get stable stage distribution
-#' stable_distribution <- iterations$final_state / sum(iterations$final_state)
-#'
+#' iterations$lambda
+#' iterations$stable_distribution
+#' iterations$all_states
 #'
 #' # Can also do this simultaneously for a collection of transition matrices
 #' k <- 2
@@ -81,12 +82,10 @@
 #' tmats[, 1, 2] <- recruit
 #'
 #' iterations <- iterate_matrix(tmats)
-#' growth_rate <- iterations$lambda
-#' final_state <- iterations$final_state
+#' iterations$lambda
+#' iterations$stable_state
+#' iterations$all_states
 #'
-#' # drop dimension and rescale to get stable stage distribution
-#' dim(final_state) <- dim(final_state)[-3]
-#' stable_distribution <- sweep(final_state, 1, rowSums(final_state), "/")
 #' }
 iterate_matrix <- function(matrix,
                            initial_state = rep(1, ncol(matrix)),
@@ -195,24 +194,39 @@ iterate_matrix <- function(matrix,
                tf_operation = "tf_iterate_matrix",
                dim = c(1, 1))
 
-  # ops to extract the two components
+  # ops to extract the components
   lambda <- op('lambda',
                states,
                tf_operation = "tf_extract_lambda",
                dim = c(n, 1))
 
-  final_state <- op('final_state',
-                     states,
-               tf_operation = "tf_extract_final_state",
-               dim = state_dim)
+  stable_distribution <- op('stable_distribution',
+                            states,
+                            tf_operation = "tf_extract_stable_distribution",
+                            dim = state_dim)
+
+  all_states_dim <- state_dim
+  if (multisite) {
+    all_states_dim[3] <- niter
+  } else {
+    all_states_dim[2] <- niter
+  }
+
+  all_states <- op('all_states',
+               states,
+               tf_operation = "tf_extract_states",
+               dim = all_states_dim)
 
   list(lambda = lambda,
-       final_state = final_state)
+       stable_distribution = stable_distribution,
+       all_states = all_states)
 
 }
 
 op <- greta::.internals$nodes$constructors$op
 as.greta_array <- greta::.internals$greta_arrays$as.greta_array
+tf_sweep <- greta::.internals$tensors$tf_sweep
+tf_colsums <- greta::.internals$tensors$tf_colsums
 
 # tensorflow code
 # iterate matrix tensor `mat` `niter` times, each time using and updating vector
@@ -225,25 +239,36 @@ tf_iterate_matrix <- function (mat, state, niter) {
   for (i in seq_len(niter))
     states[[i + 1]] <-  tf$matmul(mat, states[[i]], transpose_a = TRUE)
 
-  # return the last two states
-  states[niter + 0:1]
+  # return all the states
+  states
 
 }
 
 # return the ratio of the first stage values for the last two states, which
 # should be the intrinsic growth rate if the iteration has converged
 tf_extract_lambda <- function (states) {
+  niter <- length(states)
 
   # handle possible site dimension
   if (length(dim(states[[1]])) == 4) {
-    lambda <- states[[2]][, , 0, 0] / states[[1]][, , 0, 0]
+    lambda <- states[[niter]][, , 0, 0] / states[[niter - 1]][, , 0, 0]
   } else {
-    lambda <- states[[2]][, 0, 0] / states[[1]][, 0, 0]
+    lambda <- states[[niter]][, 0, 0] / states[[niter - 1]][, 0, 0]
   }
   lambda
 }
 
 # return the final state from matrix iteration (should have stabilised)
-tf_extract_final_state <- function (states) {
-  states[[2]]
+tf_extract_stable_distribution <- function (states) {
+  niter <- length(states)
+  state <- states[[niter]]
+  axis <- length(dim(state)) - 2L
+  sums <- tf$reduce_sum(state, axis = axis, keepdims = TRUE)
+  tf$truediv(state, sums)
+}
+
+# return the final state from matrix iteration (should have stabilised)
+tf_extract_states <- function (states) {
+  axis <- length(dim(states[[1]])) - 1L
+  tf$concat(states[-1], axis = axis)
 }

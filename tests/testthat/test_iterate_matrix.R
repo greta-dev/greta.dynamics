@@ -16,8 +16,8 @@ test_that('single iteration works', {
                              niter = niter)
 
   target_lambda <- r_iterations$lambda
-  target_state <- r_iterations$final_state
-  target_state <- target_state / sum(target_state)
+  target_stable <- r_iterations$stable_distribution
+  target_states <- r_iterations$all_states
 
   # greta version
   iterations <- iterate_matrix(matrix = mat,
@@ -25,15 +25,19 @@ test_that('single iteration works', {
                                niter = niter)
 
   lambda <- iterations$lambda
-  final_state <- iterations$final_state
-  final_state <- final_state / sum(final_state)
+  stable <- iterations$stable_distribution
+  states <- iterations$all_states
 
   greta_lambda <- calculate(lambda)
   difference <- abs(greta_lambda - target_lambda)
   expect_true(difference < 1e-12)
 
-  greta_state <- calculate(final_state)
-  difference <- abs(greta_state - target_state)
+  greta_stable <- calculate(stable)
+  difference <- abs(greta_stable - target_stable)
+  expect_true(all(difference < 1e-12))
+
+  greta_states <- calculate(states)
+  difference <- abs(greta_states - target_states)
   expect_true(all(difference < 1e-12))
 
 })
@@ -57,16 +61,22 @@ test_that('vectorised matrix iteration works', {
                               niter = niter)
 
   target_lambdas <- sapply(target_iterations, function(x) x$lambda)
-  target_states <- t(sapply(target_iterations, function(x) x$final_state))
+  target_stable <- t(sapply(target_iterations, function(x) x$stable_distribution))
+  target_states <- lapply(target_iterations, function(x) x$all_states)
+  target_states <- do.call(abind, c(target_states, along = 0))
 
   iterations <- iterate_matrix(mat,
                                initial_state = init,
                                niter = niter)
   greta_lambdas <- calculate(iterations$lambda)
-  greta_states <- calculate(iterations$final_state)
-  dim(greta_states) <- dim(greta_states)[1:2]
+  greta_stable <- calculate(iterations$stable_distribution)
+  dim(greta_stable) <- dim(greta_stable)[1:2]
+  greta_states <- calculate(iterations$all_states)
 
   difference <- abs(greta_lambdas - target_lambdas)
+  expect_true(all(difference < 1e-12))
+
+  difference <- abs(greta_stable - target_stable)
   expect_true(all(difference < 1e-12))
 
   difference <- abs(greta_states - target_states)
@@ -93,16 +103,22 @@ test_that('vectorised initial_state iteration works', {
                               })
 
   target_lambdas <- sapply(target_iterations, function(x) x$lambda)
-  target_states <- t(sapply(target_iterations, function(x) x$final_state))
+  target_stable <- t(sapply(target_iterations, function(x) x$stable_distribution))
+  target_states <- lapply(target_iterations, function(x) x$all_states)
+  target_states <- do.call(abind, c(target_states, along = 0))
 
   iterations <- iterate_matrix(mat,
                                initial_state = init,
                                niter = niter)
   greta_lambdas <- calculate(iterations$lambda)
-  greta_states <- calculate(iterations$final_state)
-  dim(greta_states) <- dim(greta_states)[1:2]
+  greta_stable <- calculate(iterations$stable_distribution)
+  dim(greta_stable) <- dim(greta_stable)[1:2]
+  greta_states <- calculate(iterations$all_states)
 
   difference <- abs(greta_lambdas - target_lambdas)
+  expect_true(all(difference < 1e-12))
+
+  difference <- abs(greta_stable - target_stable)
   expect_true(all(difference < 1e-12))
 
   difference <- abs(greta_states - target_states)

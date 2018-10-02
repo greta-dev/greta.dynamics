@@ -19,9 +19,12 @@ r_iterate_matrix <- function (matrix, state, niter) {
     states[[i + 1]] <- states[[i]] %*% matrix
 
   lambda <- states[[niter + 1]][1] / states[[niter]][1]
-  final_state <- t(states[[niter + 1]])
+  stable_distribution <- t(states[[niter + 1]])
+  stable_distribution <- stable_distribution / sum(stable_distribution)
+  all_states <- t(do.call(rbind, states[-1]))
 
   list(lambda = lambda,
-       final_state = final_state)
+       stable_distribution = stable_distribution,
+       all_states = all_states)
 }
 
