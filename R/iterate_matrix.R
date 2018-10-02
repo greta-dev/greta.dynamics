@@ -140,11 +140,10 @@ iterate_matrix <- function(matrix,
     if (!matrix_multisite) {
 
       n <- state_dim[1]
-      matrix2 <- matrix
 
       # expand matrix
-      dim(matrix2) <- c(1, dim(matrix2))
-      matrix_list <- replicate(n, matrix2, simplify = FALSE)
+      dim(matrix) <- c(1, dim(matrix))
+      matrix_list <- replicate(n, matrix, simplify = FALSE)
       matrix <- do.call(abind, c(matrix_list, list(along = 1)))
 
       matrix_dim <- dim(matrix)
