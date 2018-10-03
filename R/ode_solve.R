@@ -107,6 +107,7 @@
 ode_solve <- function (derivative, y0, times, ...,
                        method = c("ode45", "rk4", "midpoint")) {
 
+  y0 <- as.greta_array(y0)
   times <- as.greta_array(times)
   method <- match.arg(method)
 
@@ -126,7 +127,7 @@ ode_solve <- function (derivative, y0, times, ...,
   # check the arguments of derivative are valid and match dots
 
   # create a tensorflow version of the function
-  tf_derivative <- as_tf_derivative(derivative, y0, times, dots)
+  tf_derivative <- as_tf_derivative(derivative, y0, times[1], dots)
 
   # the dimensions should be the dimensions of the y0, duplicated along times
   n_time <- dim(times)[1]
@@ -207,6 +208,11 @@ as_tf_derivative <- function (derivative, y, t, dots) {
 
   # return a function acting only on tensors y and t, to feed to the ode solver
   function (y, t) {
+
+    # t will be dimensionless when used in the ode solver, need to expand out t
+    # to have same dim as a scalar constant so that it can be used in the same
+    # way as the greta array in the R function
+    t <- tf$reshape(t, shape = shape(1, 1, 1))
 
     # tf_dots will have been added to this environment by tf_ode_solve
     args <- list(y = y, t = t)
