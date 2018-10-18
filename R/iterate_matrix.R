@@ -236,7 +236,7 @@ tf_iterate_matrix <- function (mat, state, niter) {
 
   # iterate the matrix, storing states in a list
   for (i in seq_len(niter))
-    states[[i + 1]] <-  tf$matmul(mat, states[[i]], transpose_a = TRUE)
+    states[[i + 1]] <-  tf$matmul(mat, states[[i]], transpose_a = FALSE)
 
   # return all the states
   states
