@@ -83,7 +83,7 @@
 #'
 #' iterations <- iterate_matrix(tmats)
 #' iterations$lambda
-#' iterations$stable_state
+#' iterations$stable_distribution
 #' iterations$all_states
 #'
 #' }
