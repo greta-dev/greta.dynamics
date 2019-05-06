@@ -254,7 +254,10 @@ tf_extract_lambda <- function (states) {
   } else {
     lambda <- states[[niter]][, 0, 0] / states[[niter - 1]][, 0, 0]
   }
-  lambda
+
+  # add a third dimension back in
+  tf$expand_dims(lambda, axis = 2L)
+
 }
 
 # return the final state from matrix iteration (should have stabilised)
