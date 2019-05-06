@@ -12,7 +12,7 @@ r_packages:
   - deSolve
 
 r_github_packages:
-  - greta-dev/greta@dev
+  - greta-dev/greta
 
 cache:
   packages: true
