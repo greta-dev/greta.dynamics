@@ -3,5 +3,6 @@
 export(iterate_matrix)
 export(ode_solve)
 importFrom(greta,.internals)
+importFrom(greta,abind)
 importFrom(tensorflow,shape)
 importFrom(tensorflow,tf)

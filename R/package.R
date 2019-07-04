@@ -8,7 +8,7 @@
 #'   differential equations (see \code{\link{ode_solve}}) or transition matrices
 #'   (\code{\link{iterate_matrix}}).
 #'
-#' @importFrom greta .internals
+#' @importFrom greta .internals abind
 #' @importFrom tensorflow tf shape
 #'
 #' @docType package
