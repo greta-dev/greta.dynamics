@@ -1,3 +1,4 @@
 library(testthat)
-
-test_check("gretaDynamics")
+library(deSolve)
+library(abind)
+test_check("greta.dynamics")
