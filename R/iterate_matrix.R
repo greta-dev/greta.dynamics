@@ -13,9 +13,6 @@
 #'   \code{initial_state} are 3D arrays). In the latter case, the first
 #'   dimension of both objects should be the batch dimension \emph{n}.
 #'
-#' @import greta
-#' @importFrom tensorflow tf shape
-#'
 #' @param matrix either a square 2D transition matrix (with dimensions m x m),
 #'   or a 3D array (with dimensions n x m x m), giving one or more transition
 #'   matrices to iterate

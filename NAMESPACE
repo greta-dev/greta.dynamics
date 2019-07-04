@@ -2,6 +2,6 @@
 
 export(iterate_matrix)
 export(ode_solve)
-import(greta)
+importFrom(greta,.internals)
 importFrom(tensorflow,shape)
 importFrom(tensorflow,tf)

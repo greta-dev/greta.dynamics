@@ -2,17 +2,19 @@ Package: greta.dynamics
 Type: Package
 Title: Modelling Structured Dynamical Systems in greta
 Version: 0.1.0
-Date: 2018-10-02
+Date: 2019-07-04
 Author: Nick Golding
 Maintainer: Nick Golding <nick.golding.research@gmail.com>
-Description: A greta extension module providing functions for analysing transition matrices representing dynamical systems.
+Description: A greta extension module providing functions for analysing 
+  transition matrices and ordinary differential equations representing 
+  dynamical systems.
 License: Apache License 2.0
 Imports: tensorflow
-Depends: greta (>= 0.2.2)
+Depends: greta (>= 0.3.0)
 Suggests:
   testthat,
   deSolve,
   abind
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 6.1.0
+RoxygenNote: 6.1.1
