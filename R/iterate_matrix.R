@@ -245,15 +245,19 @@ tf_iterate_matrix <- function (mat, state, niter) {
 tf_extract_lambda <- function (states) {
   niter <- length(states)
 
-  # handle possible site dimension
+  # handle possible site dimension, and squeeze additional dimension from this
   if (length(dim(states[[1]])) == 4) {
-    lambda <- states[[niter]][, , 0, 0] / states[[niter - 1]][, , 0, 0]
+    before <- states[[niter - 1]][, , 0, 0, drop = FALSE]
+    after <- states[[niter]][, , 0, 0, drop = FALSE]
+    lambda <- after / before
+    lambda <- tf$squeeze(lambda, axis = 3L)
   } else {
-    lambda <- states[[niter]][, 0, 0] / states[[niter - 1]][, 0, 0]
+    before <-  states[[niter - 1]][, 0, 0, drop = FALSE]
+    after <- states[[niter]][, 0, 0, drop = FALSE]
+    lambda <- after / before
   }
 
-  # add a third dimension back in
-  tf$expand_dims(lambda, axis = 2L)
+  lambda
 
 }
 
