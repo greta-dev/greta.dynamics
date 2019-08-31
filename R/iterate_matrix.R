@@ -227,7 +227,7 @@ tf_colsums <- greta::.internals$tensors$tf_colsums
 # tensorflow code
 # iterate matrix tensor `mat` `niter` times, each time using and updating vector
 # tensor `state`, and return lambda for the final iteration
-tf_iterate_matrix <- function (mat, state, niter) {
+tf_iterate_matrix_old <- function (mat, state, niter) {
 
   states <- list(state)
 
@@ -240,10 +240,95 @@ tf_iterate_matrix <- function (mat, state, niter) {
 
 }
 
+# tensorflow code
+# iterate matrix tensor `matrix` `niter` times, each time using and updating vector
+# tensor `state`, and return lambda for the final iteration
+tf_iterate_matrix <- function (matrix, state, niter) {
+
+  # handle variable input dimensions?
+
+  # use a tensorflow while loop to do the recursion:
+  body <- function(matrix, old_state, t_all_states, iter, maxiter) {
+
+    # do matrix multiplication
+    new_state <- tf$matmul(matrix, old_state, transpose_a = TRUE)
+
+    # store new state object
+    t_all_states <- tf$tensor_scatter_nd_update(
+      tensor = t_all_states,
+      indices = iter,
+      updates = tf$transpose(new_state)
+    )
+
+    list(matrix, new_state, t_all_states, iter + 1L, maxiter)
+  }
+
+  # create a matrix of zeros to store all the states, but use *the transpose* so
+  # it's easier to update
+
+  # iter needs to have rank 2 for slice updating; make niter the same shape
+  iter <- tf$constant(1L, shape = shape(1, 1))
+  tf_niter <- tf$constant(as.integer(niter), shape = shape(1, 1))
+
+  # make a single slice (w.r.t. batch dimension) and tile along batch dimension
+  state_dim <- dim(state)[-1]
+  n_dim <- length(state_dim)
+
+  shp <- to_shape(c(niter, rev(state_dim[-n_dim]), 1))
+  t_all_states_slice <- tf$zeros(shp, dtype = tf_float())
+  batch_size <- tf$shape(matrix)[[0]]
+  ndim <- length(dim(t_all_states_slice))
+  t_all_states <- tf$tile(t_all_states_slice, c(rep(1L, ndim - 1), batch_size))
+
+  # add tolerance next
+  values <- list(matrix,
+                 state,
+                 t_all_states,
+                 iter,
+                 tf_niter)
+
+  # add tolerance next
+  cond <- function(matrix, new_state, t_all_states, iter, maxiter) {
+    tf$squeeze(tf$less(iter, maxiter))
+  }
+
+  # iterate
+  out <- tf$while_loop(cond,
+                       body,
+                       values)
+
+  # return the tensor of all the states
+  all_states <- tf$transpose(out[[3]])
+  all_states
+
+}
+
+
+
 # return the ratio of the first stage values for the last two states, which
 # should be the intrinsic growth rate if the iteration has converged
-tf_extract_lambda <- function (states) {
+tf_extract_lambda_old <- function (states) {
   niter <- length(states)
+
+  # handle possible site dimension, and squeeze additional dimension from this
+  if (length(dim(states[[1]])) == 4) {
+    before <- states[[niter - 1]][, , 0, 0, drop = FALSE]
+    after <- states[[niter]][, , 0, 0, drop = FALSE]
+    lambda <- after / before
+    lambda <- tf$squeeze(lambda, axis = 3L)
+  } else {
+    before <-  states[[niter - 1]][, 0, 0, drop = FALSE]
+    after <- states[[niter]][, 0, 0, drop = FALSE]
+    lambda <- after / before
+  }
+
+  lambda
+
+}
+
+tf_extract_lambda <- function (states) {
+
+  niter <- dim(states)[[4]]
 
   # handle possible site dimension, and squeeze additional dimension from this
   if (length(dim(states[[1]])) == 4) {
