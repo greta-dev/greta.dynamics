@@ -21,16 +21,23 @@
 #'   iterate the matrix
 #' @param niter a positive integer giving the number of times to iterate the
 #'   matrix
+#' @param tol a scalar giving a numerical tolerance, below which the algorithm
+#'   is determineed to have converged to the same growth rate in all stages
 #'
-#' @return a named list with three greta arrays: \code{lambda} a scalar or
-#'   vector giving the ratio of the first stage values between the final two
+#' @return a named list with five greta arrays: \code{lambda} a scalar or vector
+#'   giving the ratio of the first stage values between the final two
 #'   iterations, \code{stable_state} a vector or matrix (with the same
 #'   dimensions as \code{initial_state}) giving the state after the final
-#'   iteration, normalised so that the values for all stages sum to one, and
+#'   iteration, normalised so that the values for all stages sum to one,
 #'   \code{all_states} an n x m x niter matrix of the state values at each
-#'   iteration. If the system has converged in \code{niter} iterations,
-#'   \code{lambda} and \code{stable_state} correspond to the asymptotic growth
-#'   rate and stable stage distribution respectively.
+#'   iteration, \code{converged} a scalar indicating whether \emph{all} the
+#'   matrix iterations converged (to a tolerance less than \code{tol}) before
+#'   the algorithm finished (note that all chains will receive the same value
+#'   per iteration, if running with vectorised mcmc), and \code{max_iter}, the
+#'   number of iterations completed before the algorithm terminated. This should
+#'   match \code{niter} if \code{converged} is \code{FALSE}. If the system has
+#'   converged \code{lambda} and \code{stable_state} correspond to the
+#'   asymptotic growth rate and stable stage distribution respectively.
 #'
 #' @export
 #'
@@ -86,7 +93,8 @@
 #' }
 iterate_matrix <- function(matrix,
                            initial_state = rep(1, ncol(matrix)),
-                           niter = 100) {
+                           niter = 100,
+                           tol = 1e-6) {
 
   niter <- as.integer(niter)
   matrix <- as.greta_array(matrix)
@@ -183,21 +191,21 @@ iterate_matrix <- function(matrix,
 
   # op returning a fake greta array which is actually a list containing both
   # values and states
-  states <- op('iterate_matrix',
-               matrix,
-               state,
-               operation_args = list(niter = niter),
-               tf_operation = "tf_iterate_matrix",
-               dim = c(1, 1))
+  results <- op("iterate_matrix",
+                matrix,
+                state,
+                operation_args = list(niter = niter, tol = tol),
+                tf_operation = "tf_iterate_matrix",
+                dim = c(1, 1))
 
   # ops to extract the components
-  lambda <- op('lambda',
-               states,
+  lambda <- op("lambda",
+               results,
                tf_operation = "tf_extract_lambda",
                dim = c(n, 1))
 
-  stable_distribution <- op('stable_distribution',
-                            states,
+  stable_distribution <- op("stable_distribution",
+                            results,
                             tf_operation = "tf_extract_stable_distribution",
                             dim = state_dim)
 
@@ -208,14 +216,26 @@ iterate_matrix <- function(matrix,
     all_states_dim[2] <- niter
   }
 
-  all_states <- op('all_states',
-               states,
-               tf_operation = "tf_extract_states",
-               dim = all_states_dim)
+  all_states <- op("all_states",
+                   results,
+                   tf_operation = "tf_extract_states",
+                   dim = all_states_dim)
+
+  converged <- op("converged",
+                  results,
+                  tf_operation = "tf_extract_converged",
+                  dim = c(1, 1))
+
+  max_iter <- op("max_iter",
+                 results,
+                 tf_operation = "tf_extract_max_iter",
+                 dim = c(1, 1))
 
   list(lambda = lambda,
        stable_distribution = stable_distribution,
-       all_states = all_states)
+       all_states = all_states,
+       converged = converged,
+       max_iter = max_iter)
 
 }
 
@@ -225,16 +245,15 @@ tf_sweep <- greta::.internals$tensors$tf_sweep
 tf_colsums <- greta::.internals$tensors$tf_colsums
 to_shape <- greta::.internals$utils$misc$to_shape
 tf_float <- greta::.internals$utils$misc$tf_float
+expand_to_batch <- greta::.internals$utils$misc$expand_to_batch
 
 # tensorflow code
 # iterate matrix tensor `matrix` `niter` times, each time using and updating vector
 # tensor `state`, and return lambda for the final iteration
-tf_iterate_matrix <- function (matrix, state, niter) {
-
-  # handle variable input dimensions?
+tf_iterate_matrix <- function (matrix, state, niter, tol) {
 
   # use a tensorflow while loop to do the recursion:
-  body <- function(matrix, old_state, t_all_states, iter, maxiter) {
+  body <- function(matrix, old_state, t_all_states, growth_rates, converged, iter, maxiter) {
 
     # do matrix multiplication
     new_state <- tf$matmul(matrix, old_state, transpose_a = TRUE)
@@ -246,7 +265,20 @@ tf_iterate_matrix <- function (matrix, state, niter) {
       updates = tf$transpose(new_state)
     )
 
-    list(matrix, new_state, t_all_states, iter + 1L, maxiter)
+    # get the growth rate, and whether it has converged
+    growth_rates <- new_state / old_state
+    converged <- growth_converged(growth_rates, tf_tol)
+
+    list(
+      matrix,
+      new_state,
+      t_all_states,
+      growth_rates,
+      converged,
+      iter + 1L,
+      maxiter
+    )
+
   }
 
   # create a matrix of zeros to store all the states, but use *the transpose* so
@@ -255,6 +287,10 @@ tf_iterate_matrix <- function (matrix, state, niter) {
   # iter needs to have rank 2 for slice updating; make niter the same shape
   iter <- tf$constant(0L, shape = shape(1, 1))
   tf_niter <- tf$constant(as.integer(niter), shape = shape(1, 1))
+
+  # add convergence tolerance and indicator
+  tf_tol <- tf$constant(tol, dtype = tf_float())
+  converged <- tf$constant(FALSE, dtype = tf$bool)
 
   # make a single slice (w.r.t. batch dimension) and tile along batch dimension
   state_dim <- dim(state)[-1]
@@ -266,16 +302,23 @@ tf_iterate_matrix <- function (matrix, state, niter) {
   ndim <- length(dim(t_all_states_slice))
   t_all_states <- tf$tile(t_all_states_slice, c(rep(1L, ndim - 1), batch_size))
 
+  # create an initial growth rate, and expand its batches
+  shp <- to_shape(c(1, state_dim))
+  growth_rates_slice <- tf$zeros(shp, dtype = tf_float())
+  growth_rates <- expand_to_batch(growth_rates_slice, state)
+
   # add tolerance next
   values <- list(matrix,
                  state,
                  t_all_states,
+                 growth_rates,
+                 converged,
                  iter,
                  tf_niter)
 
   # add tolerance next
-  cond <- function(matrix, new_state, t_all_states, iter, maxiter) {
-    tf$squeeze(tf$less(iter, maxiter))
+  cond <- function(matrix, new_state, t_all_states, growth_rates, converged, iter, maxiter) {
+    tf$squeeze(tf$less(iter, maxiter)) & tf$logical_not(converged)
   }
 
   # iterate
@@ -283,9 +326,14 @@ tf_iterate_matrix <- function (matrix, state, niter) {
                        body,
                        values)
 
-  # return the transposed tensor of all the states
-  t_all_states <- out[[3]]
-  t_all_states
+  # return some elements: the transposed tensor of all the states
+  list(
+    state = out[[2]],
+    t_all_states = out[[3]],
+    growth_rates = out[[4]],
+    converged = out[[5]],
+    max_iter = out[[6]]
+  )
 
 }
 
@@ -304,35 +352,50 @@ take_slice <- function(x, i, j = NULL) {
   tf$slice(x, begin = from, size = n)
 }
 
+# assess convergence of the iterations to a stable growth rate. If it has
+# converged, the rate of change will be the same for all stages.
+growth_converged <- function (growth_rates, tol) {
+
+  # subtract from the average (will all be 0 if they are the same)
+  axis <- length(dim(growth_rates)) - 2L
+  avg_growth_rates <- tf$reduce_mean(
+    growth_rates,
+    axis = axis,
+    keepdims = TRUE
+  )
+  diffs <- growth_rates - avg_growth_rates
+
+  # calculate the largest deviation across all stages, sites, and the batch
+  # dimension and determiine whether it's acceptatble
+  error <- tf$reduce_max(tf$abs(diffs))
+  error < tol
+
+}
+
 # return the ratio of the first stage values for the last two states, which
 # should be the intrinsic growth rate if the iteration has converged
-tf_extract_lambda <- function (t_all_states) {
+tf_extract_lambda <- function (results) {
 
-  # slice out the first stage for the last two iterations
-  n_iter <- dim(t_all_states)[[1]]
-  before <- take_slice(t_all_states, n_iter - 1, 1)
-  after <- take_slice(t_all_states, n_iter, 1)
+  growth_rates <- results$growth_rates
 
+  # pull out value for first state (accounting for possible site dimension)
+  rank <- length(dim(growth_rates))
+  from <- rep(0L, rank)
+  n <- c(rep(-1L, rank - 2), 1L, -1L)
+  lambda <- tf$slice(growth_rates, begin = from, size = n)
 
-  # get the ratio, reshape, and return
-  t_lambda <- after / before
-  if (length(dim(t_lambda)) > 3) {
-    t_lambda <- tf$squeeze(t_lambda, 0L)
+  # maybe reshape, and return
+  if (length(dim(lambda)) > 3) {
+    lambda <- tf$squeeze(lambda, rank - 1L)
   }
-  lambda <- tf$transpose(t_lambda)
   lambda
 
 }
 
-# return the final state from matrix iteration (should have stabilised)
-tf_extract_stable_distribution <- function (t_all_states) {
+# return the final state from matrix iteration, standardised to sum to 1
+tf_extract_stable_distribution <- function (results) {
 
-  # extract final state, transpose and normalise
-  n_iter <- dim(t_all_states)[[1]]
-  t_state <- take_slice(t_all_states, n_iter)
-
-  # transpose
-  state <- tf$transpose(t_state)
+  state <- results$state
 
   # standardise
   axis <- length(dim(state)) - 2L
@@ -350,7 +413,20 @@ tf_extract_stable_distribution <- function (t_all_states) {
 }
 
 # return the final state from matrix iteration (should have stabilised)
-tf_extract_states <- function (t_all_states) {
-  tf$transpose(t_all_states)
+tf_extract_states <- function (results) {
+  tf$transpose(results$t_all_states)
+}
+
+# return a logical for whether it has converged (reshaped to have dim 1, 1)
+tf_extract_converged <- function (results) {
+  converged <- results$converged
+  converged <- tf$expand_dims(converged, 0L)
+  converged <- tf$expand_dims(converged, 0L)
+  converged
+}
+
+# return a logical for whether it has converged (reshaped to have dim 1, 1)
+tf_extract_max_iter <- function (results) {
+  results$max_iter
 }
 
