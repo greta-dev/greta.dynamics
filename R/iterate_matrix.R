@@ -223,22 +223,8 @@ op <- greta::.internals$nodes$constructors$op
 as.greta_array <- greta::.internals$greta_arrays$as.greta_array
 tf_sweep <- greta::.internals$tensors$tf_sweep
 tf_colsums <- greta::.internals$tensors$tf_colsums
-
-# tensorflow code
-# iterate matrix tensor `mat` `niter` times, each time using and updating vector
-# tensor `state`, and return lambda for the final iteration
-tf_iterate_matrix_old <- function (mat, state, niter) {
-
-  states <- list(state)
-
-  # iterate the matrix, storing states in a list
-  for (i in seq_len(niter))
-    states[[i + 1]] <-  tf$matmul(mat, states[[i]], transpose_a = TRUE)
-
-  # return all the states
-  states
-
-}
+to_shape <- greta::.internals$utils$misc$to_shape
+tf_float <- greta::.internals$utils$misc$tf_float
 
 # tensorflow code
 # iterate matrix tensor `matrix` `niter` times, each time using and updating vector
@@ -267,7 +253,7 @@ tf_iterate_matrix <- function (matrix, state, niter) {
   # it's easier to update
 
   # iter needs to have rank 2 for slice updating; make niter the same shape
-  iter <- tf$constant(1L, shape = shape(1, 1))
+  iter <- tf$constant(0L, shape = shape(1, 1))
   tf_niter <- tf$constant(as.integer(niter), shape = shape(1, 1))
 
   # make a single slice (w.r.t. batch dimension) and tile along batch dimension
@@ -297,66 +283,74 @@ tf_iterate_matrix <- function (matrix, state, niter) {
                        body,
                        values)
 
-  # return the tensor of all the states
-  all_states <- tf$transpose(out[[3]])
-  all_states
+  # return the transposed tensor of all the states
+  t_all_states <- out[[3]]
+  t_all_states
 
 }
 
+# pull out single slice of a tensor , along the first dimension
+take_slice <- function(x, i, j = NULL) {
+  rank <- length(dim(x))
 
+  # if there's an index for next dimension too, get that
+  if (!is.null(j)) {
+    from <- as.integer(c(i - 1, j - 1, rep(0, rank - 2)))
+    n <- as.integer(c(1L, 1L, rep(-1L, rank - 2)))
+  } else {
+    from <- as.integer(c(i - 1, rep(0, rank - 1)))
+    n <- as.integer(c(1L, rep(-1L, rank - 1)))
+  }
+  tf$slice(x, begin = from, size = n)
+}
 
 # return the ratio of the first stage values for the last two states, which
 # should be the intrinsic growth rate if the iteration has converged
-tf_extract_lambda_old <- function (states) {
-  niter <- length(states)
+tf_extract_lambda <- function (t_all_states) {
 
-  # handle possible site dimension, and squeeze additional dimension from this
-  if (length(dim(states[[1]])) == 4) {
-    before <- states[[niter - 1]][, , 0, 0, drop = FALSE]
-    after <- states[[niter]][, , 0, 0, drop = FALSE]
-    lambda <- after / before
-    lambda <- tf$squeeze(lambda, axis = 3L)
-  } else {
-    before <-  states[[niter - 1]][, 0, 0, drop = FALSE]
-    after <- states[[niter]][, 0, 0, drop = FALSE]
-    lambda <- after / before
+  # slice out the first stage for the last two iterations
+  n_iter <- dim(t_all_states)[[1]]
+  before <- take_slice(t_all_states, n_iter - 1, 1)
+  after <- take_slice(t_all_states, n_iter, 1)
+
+
+  # get the ratio, reshape, and return
+  t_lambda <- after / before
+  if (length(dim(t_lambda)) > 3) {
+    t_lambda <- tf$squeeze(t_lambda, 0L)
   }
-
-  lambda
-
-}
-
-tf_extract_lambda <- function (states) {
-
-  niter <- dim(states)[[4]]
-
-  # handle possible site dimension, and squeeze additional dimension from this
-  if (length(dim(states[[1]])) == 4) {
-    before <- states[[niter - 1]][, , 0, 0, drop = FALSE]
-    after <- states[[niter]][, , 0, 0, drop = FALSE]
-    lambda <- after / before
-    lambda <- tf$squeeze(lambda, axis = 3L)
-  } else {
-    before <-  states[[niter - 1]][, 0, 0, drop = FALSE]
-    after <- states[[niter]][, 0, 0, drop = FALSE]
-    lambda <- after / before
-  }
-
+  lambda <- tf$transpose(t_lambda)
   lambda
 
 }
 
 # return the final state from matrix iteration (should have stabilised)
-tf_extract_stable_distribution <- function (states) {
-  niter <- length(states)
-  state <- states[[niter]]
+tf_extract_stable_distribution <- function (t_all_states) {
+
+  # extract final state, transpose and normalise
+  n_iter <- dim(t_all_states)[[1]]
+  t_state <- take_slice(t_all_states, n_iter)
+
+  # transpose
+  state <- tf$transpose(t_state)
+
+  # standardise
   axis <- length(dim(state)) - 2L
   sums <- tf$reduce_sum(state, axis = axis, keepdims = TRUE)
-  tf$truediv(state, sums)
+  state_distrib <- tf$truediv(state, sums)
+
+  # reshape if needed
+  ndim <- length(dim(state_distrib))
+  if (ndim > 3) {
+    state_distrib <- tf$squeeze(state_distrib, ndim - 1L)
+  }
+
+  state_distrib
+
 }
 
 # return the final state from matrix iteration (should have stabilised)
-tf_extract_states <- function (states) {
-  axis <- length(dim(states[[1]])) - 1L
-  tf$concat(states[-1], axis = axis)
+tf_extract_states <- function (t_all_states) {
+  tf$transpose(t_all_states)
 }
+
