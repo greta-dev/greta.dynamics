@@ -1,9 +1,9 @@
-context('iteration functions')
+context("iteration functions")
 
-test_that('single iteration works', {
+test_that("single iteration works", {
 
   skip_if_not(greta:::check_tf_version())
-  source ('helpers.R')
+  source ("helpers.R")
 
   n <- 10
   mat <- randu(n, n)
@@ -46,10 +46,10 @@ test_that('single iteration works', {
 
 })
 
-test_that('vectorised matrix iteration works', {
+test_that("vectorised matrix iteration works", {
 
   skip_if_not(greta:::check_tf_version())
-  source('helpers.R')
+  source("helpers.R")
 
   n <- 10
   n_mat <- 20
@@ -86,10 +86,10 @@ test_that('vectorised matrix iteration works', {
 
 })
 
-test_that('vectorised initial_state iteration works', {
+test_that("vectorised initial_state iteration works", {
 
   skip_if_not(greta:::check_tf_version())
-  source('helpers.R')
+  source("helpers.R")
 
   n <- 10
   n_mat <- 20
@@ -130,9 +130,9 @@ test_that('vectorised initial_state iteration works', {
 
 })
 
-test_that('dynamics module errors informatively', {
+test_that("dynamics module errors informatively", {
 
-  source ('helpers.R')
+  source ("helpers.R")
 
   n <- 10
   m <- 3
@@ -152,48 +152,48 @@ test_that('dynamics module errors informatively', {
   # wrongly shaped matrix
   expect_error(iterate_matrix(matrix = bad_mat,
                               initial_state = good_state),
-               'matrix must be a two-dimensional square greta array')
+               "matrix must be a two-dimensional square greta array")
 
   expect_error(iterate_matrix(matrix = bad_matrices1,
                               initial_state = good_state),
-               '^matrix and state must be either two- or three-dimensional')
+               "^matrix and state must be either two- or three-dimensional")
 
   expect_error(iterate_matrix(matrix = bad_matrices1,
                               initial_state = good_states),
-               '^matrix and state must be either two- or three-dimensional')
+               "^matrix and state must be either two- or three-dimensional")
 
   expect_error(iterate_matrix(matrix = bad_matrices2,
                               initial_state = good_state),
-               '^each matrix must be a two-dimensional square greta array')
+               "^each matrix must be a two-dimensional square greta array")
 
   expect_error(iterate_matrix(matrix = bad_matrices2,
                               initial_state = good_states),
-               '^each matrix must be a two-dimensional square greta array')
+               "^each matrix must be a two-dimensional square greta array")
 
   # wrongly shaped state
   expect_error(iterate_matrix(matrix = good_mat,
                               initial_state = bad_state),
-               'initial_state must be either a column vector, or a 3D array')
+               "initial_state must be either a column vector, or a 3D array")
 
   expect_error(iterate_matrix(matrix = good_matrices,
                               initial_state = bad_state),
-               'initial_state must be either a column vector, or a 3D array')
+               "initial_state must be either a column vector, or a 3D array")
 
   # mismatched matrix and state
   expect_error(iterate_matrix(matrix = good_mat,
                               initial_state = mismatched_state),
-               'length of each initial_state must match the dimension')
+               "length of each initial_state must match the dimension")
 
   expect_error(iterate_matrix(matrix = good_matrices,
                               initial_state = mismatched_state),
-               'length of each initial_state must match the dimension')
+               "length of each initial_state must match the dimension")
 
 })
 
-test_that('convergence tolerance works', {
+test_that("convergence tolerance works", {
 
   skip_if_not(greta:::check_tf_version())
-  source ('helpers.R')
+  source ("helpers.R")
 
   n <- 10
   niter <- 100
@@ -213,7 +213,7 @@ test_that('convergence tolerance works', {
 test_that("iteration works in mcmc", {
 
   skip_if_not(greta:::check_tf_version())
-  source ('helpers.R')
+  source ("helpers.R")
 
   n <- 10
   n_site <- 30
