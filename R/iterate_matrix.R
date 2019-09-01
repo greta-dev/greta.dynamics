@@ -2,16 +2,20 @@
 #'
 #' @title iterate transition matrices
 #'
-#' @description calculate the intrinsic growth rate(s) and stable stage
+#' @description Calculate the intrinsic growth rate(s) and stable stage
 #'   distribution(s) for a stage-structured dynamical system, encoded as a
-#'   transition matrix
+#'   transition matrix.
 #'
-#' @details \code{iterate_matrix} can either act on single transition matrix and
-#'   initial state (if \code{matrix} is 2D and \code{initial_state} is a column
-#'   vector), or it can simultaneously act on \emph{n} different matrices and/or
-#'   \emph{n} different initial states (if \code{matrix} and
+#' @details \code{iterate_matrix} can either act on a single transition matrix
+#'   and initial state (if \code{matrix} is 2D and \code{initial_state} is a
+#'   column vector), or it can simultaneously act on \emph{n} different matrices
+#'   and/or \emph{n} different initial states (if \code{matrix} and
 #'   \code{initial_state} are 3D arrays). In the latter case, the first
 #'   dimension of both objects should be the batch dimension \emph{n}.
+#'
+#'   To ensure the matrix is iterated for a specific number of iterations, you
+#'   can set that number as \code{niter}, and set \code{tol} to 0 or a negative
+#'   number to ensure that the iterations are not stopped early.
 #'
 #' @param matrix either a square 2D transition matrix (with dimensions m x m),
 #'   or a 3D array (with dimensions n x m x m), giving one or more transition
@@ -19,25 +23,36 @@
 #' @param initial_state either a column vector (with m elements) or a 3D array
 #'   (with dimensions n x m x 1) giving one or more initial states from which to
 #'   iterate the matrix
-#' @param niter a positive integer giving the number of times to iterate the
-#'   matrix
+#' @param niter a positive integer giving the maximum number of times to iterate
+#'   the matrix
 #' @param tol a scalar giving a numerical tolerance, below which the algorithm
 #'   is determineed to have converged to the same growth rate in all stages
 #'
-#' @return a named list with five greta arrays: \code{lambda} a scalar or vector
-#'   giving the ratio of the first stage values between the final two
-#'   iterations, \code{stable_state} a vector or matrix (with the same
-#'   dimensions as \code{initial_state}) giving the state after the final
-#'   iteration, normalised so that the values for all stages sum to one,
-#'   \code{all_states} an n x m x niter matrix of the state values at each
-#'   iteration, \code{converged} a scalar indicating whether \emph{all} the
-#'   matrix iterations converged (to a tolerance less than \code{tol}) before
-#'   the algorithm finished (note that all chains will receive the same value
-#'   per iteration, if running with vectorised mcmc), and \code{max_iter}, the
-#'   number of iterations completed before the algorithm terminated. This should
-#'   match \code{niter} if \code{converged} is \code{FALSE}. If the system has
-#'   converged \code{lambda} and \code{stable_state} correspond to the
-#'   asymptotic growth rate and stable stage distribution respectively.
+#' @return a named list with five greta arrays:
+#' \itemize{
+#'   \item{\code{lambda}} {a scalar or vector giving the ratio of the first stage
+#'   values between the final two iterations.}
+#'   \item{\code{stable_state}} {a vector or matrix (with the same dimensions as
+#'   \code{initial_state}) giving the state after the final iteration,
+#'   normalised so that the values for all stages sum to one.}
+#'   \item{\code{all_states}} {an n x m x niter matrix of the state values at
+#'   each iteration. This will be 0 for all entries after \code{iterations}.}
+#'   \item{\code{converged}} {an integer scalar indicating whether \emph{all}
+#'   the matrix iterations converged to a tolerance less than \code{tol} (1 if
+#'   so, 0 if not) before the algorithm finished.}
+#'   \item{\code{iterations}} {a scalar of the maximum number of iterations
+#'   completed before the algorithm terminated. This should match \code{niter}
+#'   if \code{converged} is \code{FALSE}.}
+#' }
+#'
+#' @note because greta vectorises across both MCMC chains and the calculation of
+#'   greta array values, the algorithm is run until all chains (or posterior
+#'   samples), sites and stages have converged to stable growth. So a single
+#'   value of both \code{converged} and \code{iterations} is returned, and the
+#'   value of this will always have the same value in an `mcmc.list` object. So
+#'   inspecting the MCMC trace of these parameters will only tell you whether
+#'   the iteration converged in \emph{all} posterior samples, and the maximum
+#'   number of iterations required to do so across all these samples
 #'
 #' @export
 #'
@@ -226,16 +241,16 @@ iterate_matrix <- function(matrix,
                   tf_operation = "tf_extract_converged",
                   dim = c(1, 1))
 
-  max_iter <- op("max_iter",
+  iterations <- op("iterations",
                  results,
-                 tf_operation = "tf_extract_max_iter",
+                 tf_operation = "tf_extract_iterations",
                  dim = c(1, 1))
 
   list(lambda = lambda,
        stable_distribution = stable_distribution,
        all_states = all_states,
        converged = converged,
-       max_iter = max_iter)
+       iterations = iterations)
 
 }
 
@@ -246,6 +261,7 @@ tf_colsums <- greta::.internals$tensors$tf_colsums
 to_shape <- greta::.internals$utils$misc$to_shape
 tf_float <- greta::.internals$utils$misc$tf_float
 expand_to_batch <- greta::.internals$utils$misc$expand_to_batch
+tf_as_integer <- greta::.internals$tensors$tf_as_integer
 
 # tensorflow code
 # iterate matrix tensor `matrix` `niter` times, each time using and updating vector
@@ -332,7 +348,7 @@ tf_iterate_matrix <- function (matrix, state, niter, tol) {
     t_all_states = out[[3]],
     growth_rates = out[[4]],
     converged = out[[5]],
-    max_iter = out[[6]]
+    iterations = out[[6]]
   )
 
 }
@@ -417,16 +433,20 @@ tf_extract_states <- function (results) {
   tf$transpose(results$t_all_states)
 }
 
-# return a logical for whether it has converged (reshaped to have dim 1, 1)
+# return an integer for whether it has converged (1L if true, 0L if false),
+# reshaped to have dim: batch x 1 x 1
 tf_extract_converged <- function (results) {
-  converged <- results$converged
-  converged <- tf$expand_dims(converged, 0L)
-  converged <- tf$expand_dims(converged, 0L)
+  converged <- tf_as_integer(results$converged)
+  converged <- tf$reshape(converged, shape(1, 1, 1))
+  converged <- expand_to_batch(converged, results$state)
   converged
 }
 
-# return a logical for whether it has converged (reshaped to have dim 1, 1)
-tf_extract_max_iter <- function (results) {
-  results$max_iter
+# return a logical for the number of iterations taken to converge
+# (reshaped to have dim: batch x 1 x 1)
+tf_extract_iterations <- function (results) {
+  iterations <- tf$reshape(results$iterations, shape(1, 1, 1))
+  iterations <- expand_to_batch(iterations, results$state)
+  iterations
 }
 

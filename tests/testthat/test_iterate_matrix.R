@@ -13,24 +13,26 @@ test_that("single iteration works", {
   test_tol <- tol * 10
 
   # r version
-  r_iterations <- r_iterate_matrix(matrix = mat,
+  r_iterates <- r_iterate_matrix(matrix = mat,
                              state = init,
                              niter = niter,
                              tol = tol)
 
-  target_lambda <- r_iterations$lambda
-  target_stable <- r_iterations$stable_distribution
-  target_states <- r_iterations$all_states
+  target_lambda <- r_iterates$lambda
+  target_stable <- r_iterates$stable_distribution
+  target_states <- r_iterates$all_states
 
   # greta version
-  iterations <- iterate_matrix(matrix = mat,
+  iterates <- iterate_matrix(matrix = mat,
                                initial_state = init,
                                niter = niter,
                                tol = tol)
 
-  lambda <- iterations$lambda
-  stable <- iterations$stable_distribution
-  states <- iterations$all_states
+  lambda <- iterates$lambda
+  stable <- iterates$stable_distribution
+  states <- iterates$all_states
+  converged <- iterates$converged
+  iterations <- iterates$iterations
 
   greta_lambda <- calculate(lambda)
   difference <- abs(greta_lambda - target_lambda)
@@ -43,6 +45,12 @@ test_that("single iteration works", {
   greta_states <- calculate(states)
   difference <- abs(greta_states - target_states)
   expect_true(all(difference < test_tol))
+
+  greta_converged <- calculate(converged)
+  expect_true(greta_converged == 1)
+
+  greta_iterations <- calculate(iterations)
+  expect_lt(greta_iterations, niter)
 
 })
 
@@ -61,21 +69,21 @@ test_that("vectorised matrix iteration works", {
   mat_list <- lapply(seq_len(n_mat), function (i) mat[i, , ])
 
   # r version
-  target_iterations <- lapply(mat_list,
+  target_iterates <- lapply(mat_list,
                               r_iterate_matrix,
                               state = init,
                               niter = niter,
                               tol = tol)
 
-  target_lambdas <- sapply(target_iterations, function(x) x$lambda)
-  target_stable <- t(sapply(target_iterations, function(x) x$stable_distribution))
+  target_lambdas <- sapply(target_iterates, function(x) x$lambda)
+  target_stable <- t(sapply(target_iterates, function(x) x$stable_distribution))
 
-  iterations <- iterate_matrix(mat,
+  iterates <- iterate_matrix(mat,
                                initial_state = init,
                                niter = niter,
                                tol = tol)
-  greta_lambdas <- calculate(iterations$lambda)
-  greta_stable <- calculate(iterations$stable_distribution)
+  greta_lambdas <- calculate(iterates$lambda)
+  greta_stable <- calculate(iterates$stable_distribution)
   dim(greta_stable) <- dim(greta_stable)[1:2]
 
   difference <- abs(greta_lambdas - target_lambdas)
@@ -101,7 +109,7 @@ test_that("vectorised initial_state iteration works", {
   init_list <- lapply(seq_len(n_mat), function (i) init[i, , ])
 
   # r version
-  target_iterations <- lapply(init_list,
+  target_iterates <- lapply(init_list,
                               function (init) {
                                 r_iterate_matrix(
                                   mat,
@@ -111,15 +119,15 @@ test_that("vectorised initial_state iteration works", {
                                 )
                               })
 
-  target_lambdas <- sapply(target_iterations, function(x) x$lambda)
-  target_stable <- t(sapply(target_iterations, function(x) x$stable_distribution))
+  target_lambdas <- sapply(target_iterates, function(x) x$lambda)
+  target_stable <- t(sapply(target_iterates, function(x) x$stable_distribution))
 
-  iterations <- iterate_matrix(mat,
+  iterates <- iterate_matrix(mat,
                                initial_state = init,
                                niter = niter,
                                tol = tol)
-  greta_lambdas <- calculate(iterations$lambda)
-  greta_stable <- calculate(iterations$stable_distribution)
+  greta_lambdas <- calculate(iterates$lambda)
+  greta_stable <- calculate(iterates$stable_distribution)
   dim(greta_stable) <- dim(greta_stable)[1:2]
 
   difference <- abs(greta_lambdas - target_lambdas)
@@ -199,14 +207,14 @@ test_that("convergence tolerance works", {
   niter <- 100
 
   # with an identity matrix it should converge instantly
-  iterations <- iterate_matrix(matrix = diag(n))
-  converged <- calculate(iterations$converged)
-  expect_true(converged, 0L)
+  iterates <- iterate_matrix(matrix = diag(n))
+  converged <- calculate(iterates$converged)
+  expect_true(converged == 1)
 
   # with tolerance of 0, it should time out
-  iterations <- iterate_matrix(matrix = randu(n, n), tol = 0)
-  converged <- calculate(iterations$converged)
-  expect_false(converged, 1L)
+  iterates <- iterate_matrix(matrix = randu(n, n), tol = 0)
+  converged <- calculate(iterates$converged)
+  expect_false(converged == 1)
 
 })
 
@@ -220,16 +228,16 @@ test_that("iteration works in mcmc", {
 
   # non-batched case
   mat <- uniform(0, 1, dim = c(n, n))
-  iterations <- iterate_matrix(matrix = mat)
-  lambda <- iterations$lambda
+  iterates <- iterate_matrix(matrix = mat)
+  lambda <- iterates$lambda
   m <- model(lambda)
   draws <- mcmc(m, warmup = 100, n_samples = 100, verbose = FALSE)
   expect_s3_class(draws, "mcmc.list")
 
   # batched case
   mat <- uniform(0, 1, dim = c(n_site, n, n))
-  iterations <- iterate_matrix(matrix = mat)
-  lambda <- iterations$lambda
+  iterates <- iterate_matrix(matrix = mat)
+  lambda <- iterates$lambda
   m <- model(lambda)
   draws <- mcmc(m, warmup = 100, n_samples = 100, verbose = FALSE)
   expect_s3_class(draws, "mcmc.list")
