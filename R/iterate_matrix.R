@@ -26,7 +26,7 @@
 #' @param niter a positive integer giving the maximum number of times to iterate
 #'   the matrix
 #' @param tol a scalar giving a numerical tolerance, below which the algorithm
-#'   is determineed to have converged to the same growth rate in all stages
+#'   is determined to have converged to the same growth rate in all stages
 #'
 #' @return a named list with five greta arrays:
 #' \itemize{
@@ -338,9 +338,7 @@ tf_iterate_matrix <- function (matrix, state, niter, tol) {
   }
 
   # iterate
-  out <- tf$while_loop(cond,
-                       body,
-                       values)
+  out <- tf$while_loop(cond, body, values)
 
   # return some elements: the transposed tensor of all the states
   list(
