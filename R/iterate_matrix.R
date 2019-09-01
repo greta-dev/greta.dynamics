@@ -262,6 +262,7 @@ to_shape <- greta::.internals$utils$misc$to_shape
 tf_float <- greta::.internals$utils$misc$tf_float
 expand_to_batch <- greta::.internals$utils$misc$expand_to_batch
 tf_as_integer <- greta::.internals$tensors$tf_as_integer
+fl <- greta::.internals$utils$misc$fl
 
 # tensorflow code
 # iterate matrix tensor `matrix` `niter` times, each time using and updating vector
