@@ -13,19 +13,33 @@ randu <- function (...) {
 }
 
 # R versions of dynamics module methods
-r_iterate_matrix <- function (matrix, state, niter) {
-  states <- list(state)
-  for (i in seq_len(niter))
-    states[[i + 1]] <- states[[i]] %*% matrix
+r_iterate_matrix <- function (matrix, state, niter = 100, tol = 1e-6) {
 
-  lambda <- states[[niter + 1]][1] / states[[niter]][1]
-  stable_distribution <- t(states[[niter + 1]])
+  states <- list(state)
+
+  i <- 0L
+  diff <- Inf
+
+  while(i < niter & diff > tol) {
+    i <- i + 1
+    states[[i + 1]] <- states[[i]] %*% matrix
+    growth <- states[[i + 1]] / states[[i]]
+    diffs <- growth - mean(growth)
+    diff <- max(abs(diffs))
+  }
+
+  lambda <- states[[i]][1] / states[[i - 1]][1]
+  stable_distribution <- t(states[[i]])
   stable_distribution <- stable_distribution / sum(stable_distribution)
-  all_states <- t(do.call(rbind, states[-1]))
+  all_states <- matrix(0, ncol(matrix), niter)
+  states_keep <- states[-1]
+  all_states[, seq_along(states_keep)] <- t(do.call(rbind, states_keep))
 
   list(lambda = lambda,
        stable_distribution = stable_distribution,
-       all_states = all_states)
+       all_states = all_states,
+       converged = diff < tol,
+       max_iter = i)
 }
 
 # a midpoint solver for use in deSolve, from the vignette p8
