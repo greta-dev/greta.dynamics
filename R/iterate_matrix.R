@@ -272,7 +272,7 @@ tf_iterate_matrix <- function (matrix, state, niter, tol) {
   body <- function(matrix, old_state, t_all_states, growth_rates, converged, iter, maxiter) {
 
     # do matrix multiplication
-    new_state <- tf$matmul(matrix, old_state, transpose_a = TRUE)
+    new_state <- tf$matmul(matrix, old_state, transpose_a = FALSE)
 
     # store new state object
     t_all_states <- tf$tensor_scatter_nd_update(
