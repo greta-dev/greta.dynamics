@@ -29,7 +29,7 @@ r_iterate_matrix <- function (matrix, state, niter = 100, tol = 1e-6) {
   }
 
   lambda <- states[[i]][1] / states[[i - 1]][1]
-  stable_distribution <- t(states[[i]])
+  stable_distribution <- states[[i]]
   stable_distribution <- stable_distribution / sum(stable_distribution)
   all_states <- matrix(0, ncol(matrix), niter)
   states_keep <- states[-1]
