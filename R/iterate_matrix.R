@@ -3,8 +3,8 @@
 #' @title iterate transition matrices
 #'
 #' @description Calculate the intrinsic growth rate(s) and stable stage
-#'   distribution(s) for a stage-structured dynamical system, encoded as
-#'   \code{state_t = matrix %*% state_tm1}.
+#'   distribution(s) for a stage-structured dynamical system, encoded
+#'   as \code{state_t = matrix \%*\% state_tm1}.
 #'
 #' @details \code{iterate_matrix} can either act on a single transition matrix
 #'   and initial state (if \code{matrix} is 2D and \code{initial_state} is a
