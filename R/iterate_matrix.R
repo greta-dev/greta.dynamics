@@ -3,8 +3,8 @@
 #' @title iterate transition matrices
 #'
 #' @description Calculate the intrinsic growth rate(s) and stable stage
-#'   distribution(s) for a stage-structured dynamical system, encoded as a
-#'   transition matrix.
+#'   distribution(s) for a stage-structured dynamical system, encoded
+#'   as \code{state_t = matrix \%*\% state_tm1}.
 #'
 #' @details \code{iterate_matrix} can either act on a single transition matrix
 #'   and initial state (if \code{matrix} is 2D and \code{initial_state} is a
@@ -272,7 +272,7 @@ tf_iterate_matrix <- function (matrix, state, niter, tol) {
   body <- function(matrix, old_state, t_all_states, growth_rates, converged, iter, maxiter) {
 
     # do matrix multiplication
-    new_state <- tf$matmul(matrix, old_state, transpose_a = TRUE)
+    new_state <- tf$matmul(matrix, old_state, transpose_a = FALSE)
 
     # store new state object
     t_all_states <- tf$tensor_scatter_nd_update(
