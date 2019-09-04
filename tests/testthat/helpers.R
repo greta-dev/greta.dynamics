@@ -31,15 +31,15 @@ r_iterate_matrix <- function (matrix, initial_state, niter = 100, tol = 1e-6) {
   diff <- Inf
 
   while(i < niter & diff > tol) {
-    i <- i + 1L
-    states[[i + 1]] <- states[[i]] %*% matrix
+    i <- i + 1
+    states[[i + 1]] <- matrix %*% states[[i]]
     growth <- states[[i + 1]] / states[[i]]
     diffs <- growth - mean(growth)
     diff <- max(abs(diffs))
   }
 
   lambda <- states[[i]][1] / states[[i - 1]][1]
-  stable_distribution <- t(states[[i]])
+  stable_distribution <- states[[i]]
   stable_distribution <- stable_distribution / sum(stable_distribution)
   all_states <- matrix(0, ncol(matrix), niter)
   states_keep <- states[-1]
