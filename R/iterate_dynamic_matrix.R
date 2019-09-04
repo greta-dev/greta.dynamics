@@ -3,8 +3,9 @@
 #' @title iterate dynamic transition matrices
 #'
 #' @description Calculate the stable population size for a stage-structured
-#'   dynamical system, where the transition matrix itself changes at each
-#'   iteration, possibly depending on the (stage-structured) population size.
+#'   dynamical system, encoded by a transition matrix, the value of which
+#'   changes at each iteration, given by function of the previous state:
+#'   \code{state[t] = f(state[t-1]) \%*\% state[t-1]}.
 #'
 #' @details Because \code{iterate_matrix} iterates with a static transition
 #'   matrix, it converges to a stable \emph{growth rate} and \emph{relative}
@@ -196,7 +197,7 @@ tf_iterate_dynamic_matrix <- function (state, ..., tf_matrix_function, niter, to
     matrix <- tf_matrix_function(old_state, iter)
 
     # do matrix multiplication
-    new_state <- tf$matmul(matrix, old_state, transpose_a = TRUE)
+    new_state <- tf$matmul(matrix, old_state, transpose_a = FALSE)
 
     # store new state object
     t_all_states <- tf$tensor_scatter_nd_update(

@@ -63,7 +63,7 @@ r_iterate_dynamic_matrix <- function (matrix_function, initial_state, niter = 10
   while(i < niter & diff > tol) {
     i <- i + 1L
     matrix <- matrix_function(states[[i]], i, ...)
-    states[[i + 1]] <- states[[i]] %*% matrix
+    states[[i + 1]] <- matrix %*% states[[i]]
     growth <- states[[i + 1]] / states[[i]]
     diffs <- growth - 1
     diff <- max(abs(diffs))
@@ -73,7 +73,7 @@ r_iterate_dynamic_matrix <- function (matrix_function, initial_state, niter = 10
   states_keep <- states[-1]
   all_states[, seq_along(states_keep)] <- t(do.call(rbind, states_keep))
 
-  list(stable_state = t(states[[i]]),
+  list(stable_state = states[[i]],
        all_states = all_states,
        converged = as.integer(diff < tol),
        max_iter = i)
