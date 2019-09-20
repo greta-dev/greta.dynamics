@@ -79,9 +79,9 @@ test_that("vectorised matrix iteration works", {
   target_stable <- t(sapply(target_iterates, function(x) x$stable_distribution))
 
   iterates <- iterate_matrix(mat,
-                               initial_state = init,
-                               niter = niter,
-                               tol = tol)
+                             initial_state = init,
+                             niter = niter,
+                             tol = tol)
   greta_lambdas <- calculate(iterates$lambda)
   greta_stable <- calculate(iterates$stable_distribution)
   dim(greta_stable) <- dim(greta_stable)[1:2]
@@ -241,5 +241,33 @@ test_that("iteration works in mcmc", {
   m <- model(lambda)
   draws <- mcmc(m, warmup = 100, n_samples = 100, verbose = FALSE)
   expect_s3_class(draws, "mcmc.list")
+
+})
+
+test_that("iteration doesn't underflow", {
+
+  skip_if_not(greta:::check_tf_version())
+
+  mat <- matrix(0, 2, 2)
+  mat[1, 2] <- 0.9
+  states <- iterate_matrix(mat, niter = 3, tol = -Inf)
+  lambda <- calculate(states$lambda)
+  stable <- calculate(states$stable_distribution)
+  expect_true(!is.na(lambda))
+  expect_true(all(!is.na(stable)))
+
+})
+
+test_that("iteration doesn't overflow", {
+
+  skip_if_not(greta:::check_tf_version())
+
+  mat <- matrix(1e100, 2, 2)
+  mat[1, 2] <- 1e200
+  states <- iterate_matrix(mat, niter = 5, tol = -Inf)
+  lambda <- calculate(states$lambda)
+  stable <- calculate(states$stable_distribution)
+  expect_true(!is.na(lambda))
+  expect_true(all(!is.na(stable)))
 
 })

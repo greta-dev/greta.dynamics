@@ -239,7 +239,7 @@ iterate_matrix <- function(matrix,
   converged <- op("converged",
                   results,
                   tf_operation = "tf_extract_converged",
-                  dim = c(1, 1))
+                  dim = c(n, 1))
 
   iterations <- op("iterations",
                  results,
@@ -274,6 +274,16 @@ tf_iterate_matrix <- function (matrix, state, niter, tol) {
     # do matrix multiplication
     new_state <- tf$matmul(matrix, old_state, transpose_a = FALSE)
 
+    valid <- is_valid(new_state)
+
+    # update the stored growth rates and states IFF the new state is valid
+    growth_rates <- set_if_valid(valid, new_state / old_state, growth_rates)
+    state <- set_if_valid(valid, new_state, old_state)
+
+    # if not, determine that this has converged
+    converged <- growth_converged(growth_rates, tf_tol)
+    converged <- tf$logical_or(converged, tf$logical_not(valid))
+
     # store new state object
     t_all_states <- tf$tensor_scatter_nd_update(
       tensor = t_all_states,
@@ -281,13 +291,9 @@ tf_iterate_matrix <- function (matrix, state, niter, tol) {
       updates = tf$transpose(new_state)
     )
 
-    # get the growth rate, and whether it has converged
-    growth_rates <- new_state / old_state
-    converged <- growth_converged(growth_rates, tf_tol)
-
     list(
       matrix,
-      new_state,
+      state,
       t_all_states,
       growth_rates,
       converged,
@@ -304,13 +310,10 @@ tf_iterate_matrix <- function (matrix, state, niter, tol) {
   iter <- tf$constant(0L, shape = shape(1, 1))
   tf_niter <- tf$constant(as.integer(niter), shape = shape(1, 1))
 
-  # add convergence tolerance and indicator
-  tf_tol <- tf$constant(tol, dtype = tf_float())
-  converged <- tf$constant(FALSE, dtype = tf$bool)
-
   # make a single slice (w.r.t. batch dimension) and tile along batch dimension
   state_dim <- dim(state)[-1]
   n_dim <- length(state_dim)
+  n_replicates <- ifelse(n_dim == 2, 1, state_dim[1])
 
   shp <- to_shape(c(niter, rev(state_dim[-n_dim]), 1))
   t_all_states_slice <- tf$zeros(shp, dtype = tf_float())
@@ -323,6 +326,15 @@ tf_iterate_matrix <- function (matrix, state, niter, tol) {
   growth_rates_slice <- tf$zeros(shp, dtype = tf_float())
   growth_rates <- expand_to_batch(growth_rates_slice, state)
 
+  # add convergence tolerance and indicator
+  tf_tol <- tf$constant(tol, dtype = tf_float())
+  dim <- 1
+  if(n_replicates > 1) {
+    dim <- c(dim, n_replicates)
+  }
+  converged <- tf$constant(array(FALSE, dim = dim), dtype = tf$bool)
+  converged <- expand_to_batch(converged, state)
+
   # add tolerance next
   values <- list(matrix,
                  state,
@@ -334,13 +346,12 @@ tf_iterate_matrix <- function (matrix, state, niter, tol) {
 
   # add tolerance next
   cond <- function(matrix, new_state, t_all_states, growth_rates, converged, iter, maxiter) {
-    tf$squeeze(tf$less(iter, maxiter)) & tf$logical_not(converged)
+    tf$squeeze(tf$less(iter, maxiter)) &
+      tf$logical_not(tf$reduce_all(converged))
   }
 
   # iterate
-  out <- tf$while_loop(cond,
-                       body,
-                       values)
+  out <- tf$while_loop(cond, body, values)
 
   # return some elements: the transposed tensor of all the states
   list(
@@ -381,10 +392,47 @@ growth_converged <- function (growth_rates, tol) {
   )
   diffs <- growth_rates - avg_growth_rates
 
-  # calculate the largest deviation across all stages, sites, and the batch
-  # dimension and determiine whether it's acceptatble
-  error <- tf$reduce_max(tf$abs(diffs))
+  # calculate the largest deviation across all stages, (one for each replicate
+  # and batch) and determiine whether it is acceptable
+  multisite_dim <- length(dim(diffs)) - 3L
+  reduce_axes <- 1:2 + multisite_dim
+  error <- tf$reduce_max(tf$abs(diffs), axis = reduce_axes)
+  # error <- tf$expand_dims(error, 1L + multisite_dim)
   error < tol
+
+}
+
+is_valid <- function (x) {
+  valid_stages <- tf$logical_and(is_non_zero(x), tf$is_finite(x))
+  reduce_axes <- 1:2 + length(dim(x)) - 3L
+  tf$reduce_all(valid_stages, axis = reduce_axes)
+}
+
+is_non_zero <- function (x) {
+  zero <- tf$zeros(shape(), dtype = tf_float())
+  tf$logical_not(tf$equal(x, zero))
+}
+
+# a wrapper around tf$where to broadcast on multiple dimensions
+set_if_valid <- function (condition, x, y) {
+
+  # pad and tile valid to match the other dimensions
+  to_dim <- length(dim(x))
+  from_dim <- length(dim(condition))
+  extra_dims <- to_dim - from_dim
+
+  # expand out the dimensions appropriately
+  to_expand <- seq_len(extra_dims) + from_dim - 1L
+  for (dim in to_expand) {
+    condition <- tf$expand_dims(condition, dim)
+  }
+
+  # and tile
+  tiling <- c(rep(1L, from_dim),
+              dim(x)[to_expand + 1L])
+  condition <- tf$tile(condition, tiling)
+
+  tf$where(condition, x, y)
 
 }
 
@@ -433,13 +481,12 @@ tf_extract_states <- function (results) {
   tf$transpose(results$t_all_states)
 }
 
-# return an integer for whether it has converged (1L if true, 0L if false),
-# reshaped to have dim: batch x 1 x 1
+# return an integer for whether each replicate has converged (1L if true, 0L if
+# false),
 tf_extract_converged <- function (results) {
-  converged <- tf_as_integer(results$converged)
-  converged <- tf$reshape(converged, shape(1, 1, 1))
-  converged <- expand_to_batch(converged, results$state)
-  converged
+  reduce_axes <- seq_len(length(dim(results$converged)) - 1)
+  converged <- tf$reduce_any(results$converged, axis = reduce_axes)
+  tf_as_integer(converged)
 }
 
 # return a logical for the number of iterations taken to converge
