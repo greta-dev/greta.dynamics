@@ -1,8 +1,8 @@
 Package: greta.dynamics
 Type: Package
 Title: Modelling Structured Dynamical Systems in greta
-Version: 0.1.0.9002
-Date: 2019-09-05
+Version: 0.1.0.9003
+Date: 2019-09-20
 Author: Nick Golding
 Maintainer: Nick Golding <nick.golding.research@gmail.com>
 Description: A greta extension module providing functions for analysing 
