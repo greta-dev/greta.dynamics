@@ -37,9 +37,9 @@
 #'   normalised so that the values for all stages sum to one.}
 #'   \item{\code{all_states}} {an n x m x niter matrix of the state values at
 #'   each iteration. This will be 0 for all entries after \code{iterations}.}
-#'   \item{\code{converged}} {an integer scalar indicating whether \emph{all}
-#'   the matrix iterations converged to a tolerance less than \code{tol} (1 if
-#'   so, 0 if not) before the algorithm finished.}
+#'   \item{\code{converged}} {an integer scalar or vector indicating whether
+#'   the iterations for each matrix have converged to a tolerance less than
+#'   \code{tol} (1 if so, 0 if not) before the algorithm finished.}
 #'   \item{\code{iterations}} {a scalar of the maximum number of iterations
 #'   completed before the algorithm terminated. This should match \code{niter}
 #'   if \code{converged} is \code{FALSE}.}
@@ -397,7 +397,6 @@ growth_converged <- function (growth_rates, tol) {
   multisite_dim <- length(dim(diffs)) - 3L
   reduce_axes <- 1:2 + multisite_dim
   error <- tf$reduce_max(tf$abs(diffs), axis = reduce_axes)
-  # error <- tf$expand_dims(error, 1L + multisite_dim)
   error < tol
 
 }
@@ -484,9 +483,7 @@ tf_extract_states <- function (results) {
 # return an integer for whether each replicate has converged (1L if true, 0L if
 # false),
 tf_extract_converged <- function (results) {
-  reduce_axes <- seq_len(length(dim(results$converged)) - 1)
-  converged <- tf$reduce_any(results$converged, axis = reduce_axes)
-  tf_as_integer(converged)
+  tf_as_integer(results$converged)
 }
 
 # return a logical for the number of iterations taken to converge
