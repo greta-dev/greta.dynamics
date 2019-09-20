@@ -3,8 +3,8 @@
 #' @title iterate transition matrices
 #'
 #' @description Calculate the intrinsic growth rate(s) and stable stage
-#'   distribution(s) for a stage-structured dynamical system, encoded
-#'   as \code{state_t = matrix \%*\% state_tm1}.
+#'   distribution(s) for a stage-structured dynamical system, encoded by a
+#'   transition matrix, where: \code{state[t] = matrix \%*\% state[t-1]}.
 #'
 #' @details \code{iterate_matrix} can either act on a single transition matrix
 #'   and initial state (if \code{matrix} is 2D and \code{initial_state} is a
@@ -26,7 +26,7 @@
 #' @param niter a positive integer giving the maximum number of times to iterate
 #'   the matrix
 #' @param tol a scalar giving a numerical tolerance, below which the algorithm
-#'   is determineed to have converged to the same growth rate in all stages
+#'   is determined to have converged to the same growth rate in all stages
 #'
 #' @return a named list with five greta arrays:
 #' \itemize{
@@ -262,6 +262,7 @@ to_shape <- greta::.internals$utils$misc$to_shape
 tf_float <- greta::.internals$utils$misc$tf_float
 expand_to_batch <- greta::.internals$utils$misc$expand_to_batch
 tf_as_integer <- greta::.internals$tensors$tf_as_integer
+fl <- greta::.internals$utils$misc$fl
 
 # tensorflow code
 # iterate matrix tensor `matrix` `niter` times, each time using and updating vector

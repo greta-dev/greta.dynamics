@@ -20,7 +20,7 @@ iterate the matrix}
 the matrix}
 
 \item{tol}{a scalar giving a numerical tolerance, below which the algorithm
-is determineed to have converged to the same growth rate in all stages}
+is determined to have converged to the same growth rate in all stages}
 }
 \value{
 a named list with five greta arrays:
@@ -42,8 +42,8 @@ a named list with five greta arrays:
 }
 \description{
 Calculate the intrinsic growth rate(s) and stable stage
-  distribution(s) for a stage-structured dynamical system, encoded
-  as \code{state_t = matrix \%*\% state_tm1}.
+  distribution(s) for a stage-structured dynamical system, encoded by a
+  transition matrix, where: \code{state[t] = matrix \%*\% state[t-1]}.
 }
 \details{
 \code{iterate_matrix} can either act on a single transition matrix
