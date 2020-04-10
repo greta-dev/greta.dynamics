@@ -66,7 +66,7 @@ test_that('ode_solve works like deSolve::ode', {
                     method = method)
     g_out <- cbind(times, y)
 
-    greta_out <- calculate(g_out)
+    greta_out <- calculate(g_out)[[1]]
     difference <- abs(greta_out - r_out)
     expect_true(all(difference < 1e-4))
 
