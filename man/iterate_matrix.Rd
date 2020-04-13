@@ -4,8 +4,12 @@
 \alias{iterate_matrix}
 \title{iterate transition matrices}
 \usage{
-iterate_matrix(matrix, initial_state = rep(1, ncol(matrix)),
-  niter = 100, tol = 1e-06)
+iterate_matrix(
+  matrix,
+  initial_state = rep(1, ncol(matrix)),
+  niter = 100,
+  tol = 1e-06
+)
 }
 \arguments{
 \item{matrix}{either a square 2D transition matrix (with dimensions m x m),
