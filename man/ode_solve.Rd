@@ -4,8 +4,7 @@
 \alias{ode_solve}
 \title{solve ODEs}
 \usage{
-ode_solve(derivative, y0, times, ..., method = c("ode45", "rk4",
-  "midpoint"))
+ode_solve(derivative, y0, times, ..., method = c("ode45", "rk4", "midpoint"))
 }
 \arguments{
 \item{derivative}{a derivative function. The first two arguments must be 'y'
@@ -98,7 +97,7 @@ distribution(y_obs) <- normal(y, obs_sd)
 # ones in this case)
 values <- c(list(y0 = t(1:2)),
             as.list(pars))
-vals <- calculate(y, values)
+vals <- calculate(y, values = values)[[1]]
 plot(vals[, 1] ~ times, type = "l", ylim = range(vals))
 lines(vals[, 2] ~ times, lty = 2)
 points(y_obs[, 1] ~ times)

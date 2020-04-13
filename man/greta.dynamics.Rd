@@ -3,7 +3,6 @@
 \docType{package}
 \name{greta.dynamics}
 \alias{greta.dynamics}
-\alias{greta.dynamics-package}
 \title{greta.dynamics: a greta extension for modelling dynamical systems}
 \description{
 an extension to \href{https://greta-dev.github.io/greta}{greta}

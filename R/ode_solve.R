@@ -89,7 +89,7 @@
 #' # ones in this case)
 #' values <- c(list(y0 = t(1:2)),
 #'             as.list(pars))
-#' vals <- calculate(y, values)
+#' vals <- calculate(y, values = values)[[1]]
 #' plot(vals[, 1] ~ times, type = "l", ylim = range(vals))
 #' lines(vals[, 2] ~ times, lty = 2)
 #' points(y_obs[, 1] ~ times)
