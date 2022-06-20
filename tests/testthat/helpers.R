@@ -21,7 +21,10 @@ base_matrix <- function(n) {
 }
 
 # R versions of dynamics module methods
-
+r_iterate_matrix <- function (matrix,
+                              initial_state,
+                              niter = 100,
+                              tol = 1e-6) {
   states <- list(initial_state)
 
   i <- 0L
