@@ -13,38 +13,40 @@
 #' @param times a column vector of times at which to evaluate y
 #' @param ... named arguments giving greta arrays for the additional (fixed)
 #'   parameters
-#' @param method which solver to use. \code{"ode45"} uses adaptive step
-#'   sizes, whilst \code{"rk4"} and \code{"midpoint"} use the fixed grid defined
-#'   by \code{times}; they may be faster but less accurate than \code{"ode45"}.
+#' @param method which solver to use. `"ode45"` uses adaptive step
+#'   sizes, whilst `"rk4"` and `"midpoint"` use the fixed grid defined
+#'   by `times`; they may be faster but less accurate than `"ode45"`.
 #'
 #' @export
 #'
 #' @examples
 #' \dontrun{
 #' # replicate the Lotka-Volterra example from deSolve
-#' library (deSolve)
+#' library(deSolve)
 #' LVmod <- function(Time, State, Pars) {
 #'   with(as.list(c(State, Pars)), {
-#'     Ingestion <- rIng  * Prey * Predator
+#'     Ingestion <- rIng * Prey * Predator
 #'     GrowthPrey <- rGrow * Prey * (1 - Prey / K)
 #'     MortPredator <- rMort * Predator
 #'
 #'     dPrey <- GrowthPrey - Ingestion
 #'     dPredator <- Ingestion * assEff - MortPredator
 #'
-#'     return (list(c(dPrey, dPredator)))
+#'     return(list(c(dPrey, dPredator)))
 #'   })
 #' }
 #'
-#' pars  <- c(rIng = 0.2,  # /day, rate of ingestion
-#'            rGrow = 1.0,  # /day, growth rate of prey
-#'            rMort = 0.2,  # /day, mortality rate of predator
-#'            assEff = 0.5,  # -, assimilation efficiency
-#'            K = 10)  # mmol/m3, carrying capacity
+#' pars <- c(
+#'   rIng = 0.2, # /day, rate of ingestion
+#'   rGrow = 1.0, # /day, growth rate of prey
+#'   rMort = 0.2, # /day, mortality rate of predator
+#'   assEff = 0.5, # -, assimilation efficiency
+#'   K = 10
+#' ) # mmol/m3, carrying capacity
 #'
-#' yini  <- c(Prey = 1, Predator = 2)
+#' yini <- c(Prey = 1, Predator = 2)
 #' times <- seq(0, 30, by = 1)
-#' out   <- ode(yini, times, LVmod, pars)
+#' out <- ode(yini, times, LVmod, pars)
 #'
 #' # simulate observations
 #' jitter <- rnorm(2 * length(times), 0, 0.1)
@@ -58,22 +60,22 @@
 #'   Prey <- y[1, 1]
 #'   Predator <- y[1, 2]
 #'
-#'   Ingestion    <- rIng  * Prey * Predator
-#'   GrowthPrey   <- rGrow * Prey * (1 - Prey / K)
+#'   Ingestion <- rIng * Prey * Predator
+#'   GrowthPrey <- rGrow * Prey * (1 - Prey / K)
 #'   MortPredator <- rMort * Predator
 #'
-#'   dPrey        <- GrowthPrey - Ingestion
-#'   dPredator    <- Ingestion * assEff - MortPredator
+#'   dPrey <- GrowthPrey - Ingestion
+#'   dPredator <- Ingestion * assEff - MortPredator
 #'
 #'   cbind(dPrey, dPredator)
 #' }
 #'
 #' # priors for the parameters
-#' rIng <- uniform(0, 2)  # /day, rate of ingestion
-#' rGrow <- uniform(0, 3)  # /day, growth rate of prey
-#' rMort <- uniform(0, 1)  # /day, mortality rate of predator
-#' assEff <- uniform(0, 1)  # -, assimilation efficiency
-#' K <- uniform(0, 30)  # mmol/m3, carrying capacity
+#' rIng <- uniform(0, 2) # /day, rate of ingestion
+#' rGrow <- uniform(0, 3) # /day, growth rate of prey
+#' rMort <- uniform(0, 1) # /day, mortality rate of predator
+#' assEff <- uniform(0, 1) # -, assimilation efficiency
+#' K <- uniform(0, 30) # mmol/m3, carrying capacity
 #'
 #' # initial values and observation error
 #' y0 <- uniform(0, 5, dim = c(1, 2))
@@ -87,9 +89,11 @@
 #'
 #' # we can use greta to solve directly, for a fixed set of parameters (the true
 #' # ones in this case)
-#' values <- c(list(y0 = t(1:2)),
-#'             as.list(pars))
-#' vals <- calculate(y, values)
+#' values <- c(
+#'   list(y0 = t(1:2)),
+#'   as.list(pars)
+#' )
+#' vals <- calculate(y, values = values)[[1]]
 #' plot(vals[, 1] ~ times, type = "l", ylim = range(vals))
 #' lines(vals[, 2] ~ times, lty = 2)
 #' points(y_obs[, 1] ~ times)
@@ -104,9 +108,8 @@
 #' o <- opt(m)
 #' o
 #' }
-ode_solve <- function (derivative, y0, times, ...,
-                       method = c("ode45", "rk4", "midpoint")) {
-
+ode_solve <- function(derivative, y0, times, ...,
+                      method = c("ode45", "rk4", "midpoint")) {
   y0 <- as.greta_array(y0)
   times <- as.greta_array(times)
   method <- match.arg(method)
@@ -115,7 +118,8 @@ ode_solve <- function (derivative, y0, times, ...,
   t_dim <- dim(times)
   if (length(t_dim != 2) && t_dim[2] != 1) {
     stop("",
-         call. = FALSE)
+      call. = FALSE
+    )
   }
 
   dots <- list(...)
@@ -134,21 +138,21 @@ ode_solve <- function (derivative, y0, times, ...,
   y0_dims <- dim(y0)
 
   # drop the first element if it's a one
-  if (y0_dims[1] == 1)
+  if (y0_dims[1] == 1) {
     y0_dims <- y0_dims[-1]
+  }
 
   dims <- c(n_time, y0_dims)
 
   op("ode", y0, times, ...,
-     dim = dims,
-     tf_operation = "tf_ode_solve",
-     operation_args = list(tf_derivative = tf_derivative,
-                           method = method))
-
+    dim = dims,
+    tf_operation = "tf_ode_solve",
+    operation_args = list(
+      tf_derivative = tf_derivative,
+      method = method
+    )
+  )
 }
-
-tf_flatten <- greta::.internals$tensors$tf_flatten
-as_tf_function <- greta::.internals$utils$greta_array_operations$as_tf_function
 
 # internal tf function wrapping the core TF method
 # return a tensor for the integral of derivative evaluated at times, given
@@ -161,8 +165,10 @@ tf_ode_solve <- function(y0, times, ..., tf_derivative, method) {
   times <- tf$squeeze(times, 0L)
 
   # assign the dots (as tensors) to the function environment
-  assign("tf_dots", list(...),
-         environment(tf_derivative))
+  assign(
+    "tf_dots", list(...),
+    environment(tf_derivative)
+  )
 
   # integrate - need to run this with the dag's TF graph as default, so that
   # tf_derivative creates tensors correctly
@@ -171,15 +177,16 @@ tf_ode_solve <- function(y0, times, ..., tf_derivative, method) {
   tf_int <- tf$contrib$integrate
 
   integrator <- switch(method,
-                       ode45 = tf_int$odeint,
-                       rk4 = function (...) {
-                         tf_int$odeint_fixed(..., method = "rk4")
-                       },
-                       midpoint = function (...) {
-                         tf_int$odeint_fixed(..., method = "midpoint")
-                       })
+    ode45 = tf_int$odeint,
+    rk4 = function(...) {
+      tf_int$odeint_fixed(..., method = "rk4")
+    },
+    midpoint = function(...) {
+      tf_int$odeint_fixed(..., method = "midpoint")
+    }
+  )
 
-  dag$on_graph( integral <- integrator(tf_derivative, y0, times) )
+  dag$on_graph(integral <- integrator(tf_derivative, y0, times))
 
   # reshape to put batch dimension first
   permutation <- seq_along(dim(integral)) - 1L
@@ -187,17 +194,17 @@ tf_ode_solve <- function(y0, times, ..., tf_derivative, method) {
   integral <- tf$transpose(integral, perm = permutation)
 
   # if the first (non-batch) dimension of y0 was 1, drop it in the results
-  if (dim(y0)[[2]] == 1)
+  if (dim(y0)[[2]] == 1) {
     integral <- tf$squeeze(integral, 2L)
+  }
 
   integral
-
 }
 
 # given a greta/R function derivative function, and greta arrays for the inputs,
 # return a tensorflow function taking tensors for y and t and returning a tensor
 # for dydt
-as_tf_derivative <- function (derivative, y, t, dots) {
+as_tf_derivative <- function(derivative, y, t, dots) {
 
   # create a function acting on the full set of inputs, as tensors
   args <- list(r_fun = derivative, y = y, t = t)
@@ -207,7 +214,7 @@ as_tf_derivative <- function (derivative, y, t, dots) {
   tf_dots <- NULL
 
   # return a function acting only on tensors y and t, to feed to the ode solver
-  function (y, t) {
+  function(y, t) {
 
     # t will be dimensionless when used in the ode solver, need to expand out t
     # to have same dim as a scalar constant so that it can be used in the same
@@ -217,7 +224,5 @@ as_tf_derivative <- function (derivative, y, t, dots) {
     # tf_dots will have been added to this environment by tf_ode_solve
     args <- list(y = y, t = t)
     do.call(tf_fun, c(args, tf_dots))
-
   }
-
 }

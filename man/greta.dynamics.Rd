@@ -3,11 +3,10 @@
 \docType{package}
 \name{greta.dynamics}
 \alias{greta.dynamics}
-\alias{greta.dynamics-package}
 \title{greta.dynamics: a greta extension for modelling dynamical systems}
 \description{
 an extension to \href{https://greta-dev.github.io/greta}{greta}
-  with functions for simulating dynamical systems, defined by of ordinary
-  differential equations (see \code{\link{ode_solve}}) or transition matrices
-  (\code{\link{iterate_matrix}}).
+with functions for simulating dynamical systems, defined by of ordinary
+differential equations (see \code{\link[=ode_solve]{ode_solve()}}) or transition matrices
+(\code{\link[=iterate_matrix]{iterate_matrix()}}).
 }

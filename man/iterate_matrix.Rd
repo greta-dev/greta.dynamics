@@ -4,8 +4,12 @@
 \alias{iterate_matrix}
 \title{iterate transition matrices}
 \usage{
-iterate_matrix(matrix, initial_state = rep(1, ncol(matrix)),
-  niter = 100, tol = 1e-06)
+iterate_matrix(
+  matrix,
+  initial_state = rep(1, ncol(matrix)),
+  niter = 100,
+  tol = 1e-06
+)
 }
 \arguments{
 \item{matrix}{either a square 2D transition matrix (with dimensions m x m),
@@ -25,19 +29,19 @@ is determined to have converged to the same growth rate in all stages}
 \value{
 a named list with five greta arrays:
 \itemize{
-  \item{\code{lambda}} {a scalar or vector giving the ratio of the first stage
-  values between the final two iterations.}
-  \item{\code{stable_state}} {a vector or matrix (with the same dimensions as
-  \code{initial_state}) giving the state after the final iteration,
-  normalised so that the values for all stages sum to one.}
-  \item{\code{all_states}} {an n x m x niter matrix of the state values at
-  each iteration. This will be 0 for all entries after \code{iterations}.}
-  \item{\code{converged}} {an integer scalar indicating whether \emph{all}
-  the matrix iterations converged to a tolerance less than \code{tol} (1 if
-  so, 0 if not) before the algorithm finished.}
-  \item{\code{iterations}} {a scalar of the maximum number of iterations
-  completed before the algorithm terminated. This should match \code{niter}
-  if \code{converged} is \code{FALSE}.}
+\item{\code{lambda}} {a scalar or vector giving the ratio of the first stage
+values between the final two iterations.}
+\item{\code{stable_state}} {a vector or matrix (with the same dimensions as
+\code{initial_state}) giving the state after the final iteration,
+normalised so that the values for all stages sum to one.}
+\item{\code{all_states}} {an n x m x niter matrix of the state values at
+each iteration. This will be 0 for all entries after \code{iterations}.}
+\item{\code{converged}} {an integer scalar or vector indicating whether
+the iterations for each matrix have converged to a tolerance less than
+\code{tol} (1 if so, 0 if not) before the algorithm finished.}
+\item{\code{iterations}} {a scalar of the maximum number of iterations
+completed before the algorithm terminated. This should match \code{niter}
+if \code{converged} is \code{FALSE}.}
 }
 }
 \description{
@@ -47,25 +51,25 @@ Calculate the intrinsic growth rate(s) and stable stage
 }
 \details{
 \code{iterate_matrix} can either act on a single transition matrix
-  and initial state (if \code{matrix} is 2D and \code{initial_state} is a
-  column vector), or it can simultaneously act on \emph{n} different matrices
-  and/or \emph{n} different initial states (if \code{matrix} and
-  \code{initial_state} are 3D arrays). In the latter case, the first
-  dimension of both objects should be the batch dimension \emph{n}.
+and initial state (if \code{matrix} is 2D and \code{initial_state} is a
+column vector), or it can simultaneously act on \emph{n} different matrices
+and/or \emph{n} different initial states (if \code{matrix} and
+\code{initial_state} are 3D arrays). In the latter case, the first
+dimension of both objects should be the batch dimension \emph{n}.
 
-  To ensure the matrix is iterated for a specific number of iterations, you
-  can set that number as \code{niter}, and set \code{tol} to 0 or a negative
-  number to ensure that the iterations are not stopped early.
+To ensure the matrix is iterated for a specific number of iterations, you
+can set that number as \code{niter}, and set \code{tol} to 0 or a negative
+number to ensure that the iterations are not stopped early.
 }
 \note{
 because greta vectorises across both MCMC chains and the calculation of
-  greta array values, the algorithm is run until all chains (or posterior
-  samples), sites and stages have converged to stable growth. So a single
-  value of both \code{converged} and \code{iterations} is returned, and the
-  value of this will always have the same value in an `mcmc.list` object. So
-  inspecting the MCMC trace of these parameters will only tell you whether
-  the iteration converged in \emph{all} posterior samples, and the maximum
-  number of iterations required to do so across all these samples
+greta array values, the algorithm is run until all chains (or posterior
+samples), sites and stages have converged to stable growth. So a single
+value of both \code{converged} and \code{iterations} is returned, and the
+value of this will always have the same value in an \code{mcmc.list} object. So
+inspecting the MCMC trace of these parameters will only tell you whether
+the iteration converged in \emph{all} posterior samples, and the maximum
+number of iterations required to do so across all these samples
 }
 \examples{
 \dontrun{
