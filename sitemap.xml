@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://greta-dev.github.io/greta.dynamics/404.html</loc>
+  </url>
+  <url>
+    <loc>https://greta-dev.github.io/greta.dynamics/authors.html</loc>
+  </url>
+  <url>
+    <loc>https://greta-dev.github.io/greta.dynamics/index.html</loc>
+  </url>
+  <url>
+    <loc>https://greta-dev.github.io/greta.dynamics/reference/greta.dynamics.html</loc>
+  </url>
+  <url>
+    <loc>https://greta-dev.github.io/greta.dynamics/reference/index.html</loc>
+  </url>
+  <url>
+    <loc>https://greta-dev.github.io/greta.dynamics/reference/iterate_matrix.html</loc>
+  </url>
+  <url>
+    <loc>https://greta-dev.github.io/greta.dynamics/reference/ode_solve.html</loc>
+  </url>
+</urlset>
