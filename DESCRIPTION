@@ -16,7 +16,8 @@ Description: A greta extension module providing functions for analysing
   transition matrices and ordinary differential equations representing 
   dynamical systems.
 License: Apache License 2.0
-URL: https://github.com/greta-dev/greta.dynamics
+URL: https://github.com/greta-dev/greta.dynamics,
+    https://greta-dev.github.io/greta.dynamics/
 BugReports: https://github.com/greta-dev/greta.dynamics/issues
 Imports: 
     cli,
