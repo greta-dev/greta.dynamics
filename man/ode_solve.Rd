@@ -24,35 +24,40 @@ parameters}
 sizes, whilst \code{"rk4"} and \code{"midpoint"} use the fixed grid defined
 by \code{times}; they may be faster but less accurate than \code{"ode45"}.}
 }
+\value{
+greta array
+}
 \description{
 Solve a system of ordinary differential equations.
 }
 \examples{
 \dontrun{
 # replicate the Lotka-Volterra example from deSolve
-library (deSolve)
+library(deSolve)
 LVmod <- function(Time, State, Pars) {
   with(as.list(c(State, Pars)), {
-    Ingestion <- rIng  * Prey * Predator
+    Ingestion <- rIng * Prey * Predator
     GrowthPrey <- rGrow * Prey * (1 - Prey / K)
     MortPredator <- rMort * Predator
 
     dPrey <- GrowthPrey - Ingestion
     dPredator <- Ingestion * assEff - MortPredator
 
-    return (list(c(dPrey, dPredator)))
+    return(list(c(dPrey, dPredator)))
   })
 }
 
-pars  <- c(rIng = 0.2,  # /day, rate of ingestion
-           rGrow = 1.0,  # /day, growth rate of prey
-           rMort = 0.2,  # /day, mortality rate of predator
-           assEff = 0.5,  # -, assimilation efficiency
-           K = 10)  # mmol/m3, carrying capacity
+pars <- c(
+  rIng = 0.2, # /day, rate of ingestion
+  rGrow = 1.0, # /day, growth rate of prey
+  rMort = 0.2, # /day, mortality rate of predator
+  assEff = 0.5, # -, assimilation efficiency
+  K = 10
+) # mmol/m3, carrying capacity
 
-yini  <- c(Prey = 1, Predator = 2)
+yini <- c(Prey = 1, Predator = 2)
 times <- seq(0, 30, by = 1)
-out   <- ode(yini, times, LVmod, pars)
+out <- ode(yini, times, LVmod, pars)
 
 # simulate observations
 jitter <- rnorm(2 * length(times), 0, 0.1)
@@ -66,22 +71,22 @@ lotka_volterra <- function(y, t, rIng, rGrow, rMort, assEff, K) {
   Prey <- y[1, 1]
   Predator <- y[1, 2]
 
-  Ingestion    <- rIng  * Prey * Predator
-  GrowthPrey   <- rGrow * Prey * (1 - Prey / K)
+  Ingestion <- rIng * Prey * Predator
+  GrowthPrey <- rGrow * Prey * (1 - Prey / K)
   MortPredator <- rMort * Predator
 
-  dPrey        <- GrowthPrey - Ingestion
-  dPredator    <- Ingestion * assEff - MortPredator
+  dPrey <- GrowthPrey - Ingestion
+  dPredator <- Ingestion * assEff - MortPredator
 
   cbind(dPrey, dPredator)
 }
 
 # priors for the parameters
-rIng <- uniform(0, 2)  # /day, rate of ingestion
-rGrow <- uniform(0, 3)  # /day, growth rate of prey
-rMort <- uniform(0, 1)  # /day, mortality rate of predator
-assEff <- uniform(0, 1)  # -, assimilation efficiency
-K <- uniform(0, 30)  # mmol/m3, carrying capacity
+rIng <- uniform(0, 2) # /day, rate of ingestion
+rGrow <- uniform(0, 3) # /day, growth rate of prey
+rMort <- uniform(0, 1) # /day, mortality rate of predator
+assEff <- uniform(0, 1) # -, assimilation efficiency
+K <- uniform(0, 30) # mmol/m3, carrying capacity
 
 # initial values and observation error
 y0 <- uniform(0, 5, dim = c(1, 2))
@@ -95,8 +100,10 @@ distribution(y_obs) <- normal(y, obs_sd)
 
 # we can use greta to solve directly, for a fixed set of parameters (the true
 # ones in this case)
-values <- c(list(y0 = t(1:2)),
-            as.list(pars))
+values <- c(
+  list(y0 = t(1:2)),
+  as.list(pars)
+)
 vals <- calculate(y, values = values)[[1]]
 plot(vals[, 1] ~ times, type = "l", ylim = range(vals))
 lines(vals[, 2] ~ times, lty = 2)

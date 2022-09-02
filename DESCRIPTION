@@ -23,7 +23,7 @@ Description: A 'greta' extension for analysing transition matrices and
   functions for analysing transition matrices by iteration, and solving 
   ordinary differential equations. This is an extension to the 'greta' 
   software, Golding (2019) <doi:10.21105/joss.01601>.
-License: Apache License 2.0
+License: Apache License (>= 2)
 URL: https://github.com/greta-dev/greta.dynamics,
     https://greta-dev.github.io/greta.dynamics/
 BugReports: https://github.com/greta-dev/greta.dynamics/issues
