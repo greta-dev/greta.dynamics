@@ -1,7 +1,7 @@
 #' greta.dynamics: a greta extension for modelling dynamical systems
 #' @name greta.dynamics
 #'
-#' @description an extension to [greta](https://greta-dev.github.io/greta)
+#' @description an extension to [greta](https://greta-stats.org/)
 #'   with functions for simulating dynamical systems, defined by of ordinary
 #'   differential equations (see [ode_solve()]) or transition matrices
 #'   ([iterate_matrix()]).
