@@ -24,7 +24,7 @@ iterate the matrix}
 the matrix}
 
 \item{tol}{a scalar giving a numerical tolerance, below which the algorithm
-is determineed to have converged to the same growth rate in all stages}
+is determined to have converged to the same growth rate in all stages}
 }
 \value{
 a named list with five greta arrays:
