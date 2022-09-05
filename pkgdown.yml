@@ -4,7 +4,7 @@ pkgdown_sha: ~
 articles:
   iterate-matrix-example: iterate-matrix-example.html
   ode-solve-example: ode-solve-example.html
-last_built: 2022-09-05T07:30Z
+last_built: 2022-09-05T07:36Z
 urls:
   reference: https://greta-dev.github.io/greta.dynamics/reference
   article: https://greta-dev.github.io/greta.dynamics/articles
