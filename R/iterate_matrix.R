@@ -26,7 +26,7 @@
 #' @param niter a positive integer giving the maximum number of times to iterate
 #'   the matrix
 #' @param tol a scalar giving a numerical tolerance, below which the algorithm
-#'   is determineed to have converged to the same growth rate in all stages
+#'   is determined to have converged to the same growth rate in all stages
 #'
 #' @return a named list with five greta arrays:
 #' \itemize{
@@ -402,7 +402,7 @@ growth_converged <- function(growth_rates, tol) {
 }
 
 is_valid <- function(x) {
-  valid_stages <- tf$logical_and(is_non_zero(x), tf$is_finite(x))
+  valid_stages <- tf$logical_and(is_non_zero(x), tf$math$is_finite(x))
   reduce_axes <- 1:2 + length(dim(x)) - 3L
   tf$reduce_all(valid_stages, axis = reduce_axes)
 }
