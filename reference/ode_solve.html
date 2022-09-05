@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">greta.dynamics</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9004</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -27,6 +27,9 @@
     <a class="dropdown-item" href="../articles/iterate-matrix-example.html">iterate-matrix-example</a>
     <a class="dropdown-item" href="../articles/ode-solve-example.html">ode-solve-example</a>
   </div>
+</li>
+<li class="nav-item">
+  <a class="nav-link" href="../news/index.html">Changelog</a>
 </li>
       </ul><form class="form-inline my-2 my-lg-0" role="search">
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off"></form>
@@ -87,34 +90,42 @@ sizes, whilst <code>"rk4"</code> and <code>"midpoint"</code> use the fixed grid 
 by <code>times</code>; they may be faster but less accurate than <code>"ode45"</code>.</p></dd>
 
 </dl></div>
+    <div class="section level2">
+    <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
+    
+
+<p>greta array</p>
+    </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
 <span class="r-in"><span><span class="co"># replicate the Lotka-Volterra example from deSolve</span></span></span>
-<span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span> <span class="op">(</span><span class="va"><a href="http://desolve.r-forge.r-project.org/" class="external-link">deSolve</a></span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="http://desolve.r-forge.r-project.org/" class="external-link">deSolve</a></span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">LVmod</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">Time</span>, <span class="va">State</span>, <span class="va">Pars</span><span class="op">)</span> <span class="op">{</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">with</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">as.list</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">State</span>, <span class="va">Pars</span><span class="op">)</span><span class="op">)</span>, <span class="op">{</span></span></span>
-<span class="r-in"><span>    <span class="va">Ingestion</span> <span class="op">&lt;-</span> <span class="va">rIng</span>  <span class="op">*</span> <span class="va">Prey</span> <span class="op">*</span> <span class="va">Predator</span></span></span>
+<span class="r-in"><span>    <span class="va">Ingestion</span> <span class="op">&lt;-</span> <span class="va">rIng</span> <span class="op">*</span> <span class="va">Prey</span> <span class="op">*</span> <span class="va">Predator</span></span></span>
 <span class="r-in"><span>    <span class="va">GrowthPrey</span> <span class="op">&lt;-</span> <span class="va">rGrow</span> <span class="op">*</span> <span class="va">Prey</span> <span class="op">*</span> <span class="op">(</span><span class="fl">1</span> <span class="op">-</span> <span class="va">Prey</span> <span class="op">/</span> <span class="va">K</span><span class="op">)</span></span></span>
 <span class="r-in"><span>    <span class="va">MortPredator</span> <span class="op">&lt;-</span> <span class="va">rMort</span> <span class="op">*</span> <span class="va">Predator</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>    <span class="va">dPrey</span> <span class="op">&lt;-</span> <span class="va">GrowthPrey</span> <span class="op">-</span> <span class="va">Ingestion</span></span></span>
 <span class="r-in"><span>    <span class="va">dPredator</span> <span class="op">&lt;-</span> <span class="va">Ingestion</span> <span class="op">*</span> <span class="va">assEff</span> <span class="op">-</span> <span class="va">MortPredator</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span>    <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">dPrey</span>, <span class="va">dPredator</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">dPrey</span>, <span class="va">dPredator</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="op">}</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">pars</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>rIng <span class="op">=</span> <span class="fl">0.2</span>,  <span class="co"># /day, rate of ingestion</span></span></span>
-<span class="r-in"><span>           rGrow <span class="op">=</span> <span class="fl">1.0</span>,  <span class="co"># /day, growth rate of prey</span></span></span>
-<span class="r-in"><span>           rMort <span class="op">=</span> <span class="fl">0.2</span>,  <span class="co"># /day, mortality rate of predator</span></span></span>
-<span class="r-in"><span>           assEff <span class="op">=</span> <span class="fl">0.5</span>,  <span class="co"># -, assimilation efficiency</span></span></span>
-<span class="r-in"><span>           K <span class="op">=</span> <span class="fl">10</span><span class="op">)</span>  <span class="co"># mmol/m3, carrying capacity</span></span></span>
+<span class="r-in"><span><span class="va">pars</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  rIng <span class="op">=</span> <span class="fl">0.2</span>, <span class="co"># /day, rate of ingestion</span></span></span>
+<span class="r-in"><span>  rGrow <span class="op">=</span> <span class="fl">1.0</span>, <span class="co"># /day, growth rate of prey</span></span></span>
+<span class="r-in"><span>  rMort <span class="op">=</span> <span class="fl">0.2</span>, <span class="co"># /day, mortality rate of predator</span></span></span>
+<span class="r-in"><span>  assEff <span class="op">=</span> <span class="fl">0.5</span>, <span class="co"># -, assimilation efficiency</span></span></span>
+<span class="r-in"><span>  K <span class="op">=</span> <span class="fl">10</span></span></span>
+<span class="r-in"><span><span class="op">)</span> <span class="co"># mmol/m3, carrying capacity</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">yini</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>Prey <span class="op">=</span> <span class="fl">1</span>, Predator <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">yini</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>Prey <span class="op">=</span> <span class="fl">1</span>, Predator <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">times</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">30</span>, by <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">out</span>   <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/deSolve/man/ode.html" class="external-link">ode</a></span><span class="op">(</span><span class="va">yini</span>, <span class="va">times</span>, <span class="va">LVmod</span>, <span class="va">pars</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/deSolve/man/ode.html" class="external-link">ode</a></span><span class="op">(</span><span class="va">yini</span>, <span class="va">times</span>, <span class="va">LVmod</span>, <span class="va">pars</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># simulate observations</span></span></span>
 <span class="r-in"><span><span class="va">jitter</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">2</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">times</span><span class="op">)</span>, <span class="fl">0</span>, <span class="fl">0.1</span><span class="op">)</span></span></span>
@@ -128,22 +139,22 @@ by <code>times</code>; they may be faster but less accurate than <code>"ode45"</
 <span class="r-in"><span>  <span class="va">Prey</span> <span class="op">&lt;-</span> <span class="va">y</span><span class="op">[</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">]</span></span></span>
 <span class="r-in"><span>  <span class="va">Predator</span> <span class="op">&lt;-</span> <span class="va">y</span><span class="op">[</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">]</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span>  <span class="va">Ingestion</span>    <span class="op">&lt;-</span> <span class="va">rIng</span>  <span class="op">*</span> <span class="va">Prey</span> <span class="op">*</span> <span class="va">Predator</span></span></span>
-<span class="r-in"><span>  <span class="va">GrowthPrey</span>   <span class="op">&lt;-</span> <span class="va">rGrow</span> <span class="op">*</span> <span class="va">Prey</span> <span class="op">*</span> <span class="op">(</span><span class="fl">1</span> <span class="op">-</span> <span class="va">Prey</span> <span class="op">/</span> <span class="va">K</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="va">Ingestion</span> <span class="op">&lt;-</span> <span class="va">rIng</span> <span class="op">*</span> <span class="va">Prey</span> <span class="op">*</span> <span class="va">Predator</span></span></span>
+<span class="r-in"><span>  <span class="va">GrowthPrey</span> <span class="op">&lt;-</span> <span class="va">rGrow</span> <span class="op">*</span> <span class="va">Prey</span> <span class="op">*</span> <span class="op">(</span><span class="fl">1</span> <span class="op">-</span> <span class="va">Prey</span> <span class="op">/</span> <span class="va">K</span><span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="va">MortPredator</span> <span class="op">&lt;-</span> <span class="va">rMort</span> <span class="op">*</span> <span class="va">Predator</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span>  <span class="va">dPrey</span>        <span class="op">&lt;-</span> <span class="va">GrowthPrey</span> <span class="op">-</span> <span class="va">Ingestion</span></span></span>
-<span class="r-in"><span>  <span class="va">dPredator</span>    <span class="op">&lt;-</span> <span class="va">Ingestion</span> <span class="op">*</span> <span class="va">assEff</span> <span class="op">-</span> <span class="va">MortPredator</span></span></span>
+<span class="r-in"><span>  <span class="va">dPrey</span> <span class="op">&lt;-</span> <span class="va">GrowthPrey</span> <span class="op">-</span> <span class="va">Ingestion</span></span></span>
+<span class="r-in"><span>  <span class="va">dPredator</span> <span class="op">&lt;-</span> <span class="va">Ingestion</span> <span class="op">*</span> <span class="va">assEff</span> <span class="op">-</span> <span class="va">MortPredator</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">dPrey</span>, <span class="va">dPredator</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># priors for the parameters</span></span></span>
-<span class="r-in"><span><span class="va">rIng</span> <span class="op">&lt;-</span> <span class="fu">uniform</span><span class="op">(</span><span class="fl">0</span>, <span class="fl">2</span><span class="op">)</span>  <span class="co"># /day, rate of ingestion</span></span></span>
-<span class="r-in"><span><span class="va">rGrow</span> <span class="op">&lt;-</span> <span class="fu">uniform</span><span class="op">(</span><span class="fl">0</span>, <span class="fl">3</span><span class="op">)</span>  <span class="co"># /day, growth rate of prey</span></span></span>
-<span class="r-in"><span><span class="va">rMort</span> <span class="op">&lt;-</span> <span class="fu">uniform</span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span>  <span class="co"># /day, mortality rate of predator</span></span></span>
-<span class="r-in"><span><span class="va">assEff</span> <span class="op">&lt;-</span> <span class="fu">uniform</span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span>  <span class="co"># -, assimilation efficiency</span></span></span>
-<span class="r-in"><span><span class="va">K</span> <span class="op">&lt;-</span> <span class="fu">uniform</span><span class="op">(</span><span class="fl">0</span>, <span class="fl">30</span><span class="op">)</span>  <span class="co"># mmol/m3, carrying capacity</span></span></span>
+<span class="r-in"><span><span class="va">rIng</span> <span class="op">&lt;-</span> <span class="fu">uniform</span><span class="op">(</span><span class="fl">0</span>, <span class="fl">2</span><span class="op">)</span> <span class="co"># /day, rate of ingestion</span></span></span>
+<span class="r-in"><span><span class="va">rGrow</span> <span class="op">&lt;-</span> <span class="fu">uniform</span><span class="op">(</span><span class="fl">0</span>, <span class="fl">3</span><span class="op">)</span> <span class="co"># /day, growth rate of prey</span></span></span>
+<span class="r-in"><span><span class="va">rMort</span> <span class="op">&lt;-</span> <span class="fu">uniform</span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span> <span class="co"># /day, mortality rate of predator</span></span></span>
+<span class="r-in"><span><span class="va">assEff</span> <span class="op">&lt;-</span> <span class="fu">uniform</span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span> <span class="co"># -, assimilation efficiency</span></span></span>
+<span class="r-in"><span><span class="va">K</span> <span class="op">&lt;-</span> <span class="fu">uniform</span><span class="op">(</span><span class="fl">0</span>, <span class="fl">30</span><span class="op">)</span> <span class="co"># mmol/m3, carrying capacity</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># initial values and observation error</span></span></span>
 <span class="r-in"><span><span class="va">y0</span> <span class="op">&lt;-</span> <span class="fu">uniform</span><span class="op">(</span><span class="fl">0</span>, <span class="fl">5</span>, dim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span></span>
@@ -157,8 +168,10 @@ by <code>times</code>; they may be faster but less accurate than <code>"ode45"</
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># we can use greta to solve directly, for a fixed set of parameters (the true</span></span></span>
 <span class="r-in"><span><span class="co"># ones in this case)</span></span></span>
-<span class="r-in"><span><span class="va">values</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>y0 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>            <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">as.list</a></span><span class="op">(</span><span class="va">pars</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">values</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>y0 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">as.list</a></span><span class="op">(</span><span class="va">pars</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">vals</span> <span class="op">&lt;-</span> <span class="fu">calculate</span><span class="op">(</span><span class="va">y</span>, values <span class="op">=</span> <span class="va">values</span><span class="op">)</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">vals</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span> <span class="op">~</span> <span class="va">times</span>, type <span class="op">=</span> <span class="st">"l"</span>, ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/range.html" class="external-link">range</a></span><span class="op">(</span><span class="va">vals</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="va">vals</span><span class="op">[</span>, <span class="fl">2</span><span class="op">]</span> <span class="op">~</span> <span class="va">times</span>, lty <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
@@ -181,7 +194,7 @@ by <code>times</code>; they may be faster but less accurate than <code>"ode45"</
 
 
     <footer><div class="pkgdown-footer-left">
-  <p></p><p>Developed by Nick Golding.</p>
+  <p></p><p>Developed by Nick Golding, Nicholas Tierney.</p>
 </div>
 
 <div class="pkgdown-footer-right">
