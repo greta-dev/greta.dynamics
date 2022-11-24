@@ -16,7 +16,7 @@ test_that("single iteration works", {
                                  initial_state = init,
                                  niter = niter,
                                  tol = tol)
-  
+
   target_lambda <- r_iterates$lambda
   target_stable <- r_iterates$stable_distribution
   target_states <- r_iterates$all_states
@@ -81,8 +81,8 @@ test_that("vectorised matrix iteration works", {
                              initial_state = init,
                              niter = niter,
                              tol = tol)
-  greta_lambdas <- calculate(iterates$lambda)
-  greta_stable <- calculate(iterates$stable_distribution)
+  greta_lambdas <- calculate(iterates$lambda)[[1]]
+  greta_stable <- calculate(iterates$stable_distribution)[[1]]
   dim(greta_stable) <- dim(greta_stable)[1:2]
 
   difference <- abs(greta_lambdas - target_lambdas)

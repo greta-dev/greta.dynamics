@@ -54,18 +54,18 @@ test_that("single iteration works", {
   converged <- iterates$converged
   iterations <- iterates$iterations
 
-  greta_stable <- calculate(stable)
+  greta_stable <- calculate(stable)[[1]]
   difference <- abs(greta_stable - target_stable)
   expect_true(all(difference < test_tol))
 
-  greta_states <- calculate(states)
+  greta_states <- calculate(states)[[1]]
   difference <- abs(greta_states - target_states)
   expect_true(all(difference < test_tol))
 
-  greta_converged <- calculate(converged)
+  greta_converged <- calculate(converged)[[1]]
   expect_true(greta_converged == 1)
 
-  greta_iterations <- calculate(iterations)
+  greta_iterations <- calculate(iterations)[[1]]
   expect_lt(greta_iterations, niter)
 
 })
@@ -98,8 +98,8 @@ test_that("single iteration works", {
 #                              initial_state = init,
 #                              niter = niter,
 #                              tol = tol)
-#   greta_lambdas <- calculate(iterates$lambda)
-#   greta_stable <- calculate(iterates$stable_distribution)
+#   greta_lambdas <- calculate(iterates$lambda)[[1]]
+#   greta_stable <- calculate(iterates$stable_distribution)[[1]]
 #   dim(greta_stable) <- dim(greta_stable)[1:2]
 #
 #   difference <- abs(greta_lambdas - target_lambdas)
@@ -142,8 +142,8 @@ test_that("single iteration works", {
 #                              initial_state = init,
 #                              niter = niter,
 #                              tol = tol)
-#   greta_lambdas <- calculate(iterates$lambda)
-#   greta_stable <- calculate(iterates$stable_distribution)
+#   greta_lambdas <- calculate(iterates$lambda)[[1]]
+#   greta_stable <- calculate(iterates$stable_distribution)[[1]]
 #   dim(greta_stable) <- dim(greta_stable)[1:2]
 #
 #   difference <- abs(greta_lambdas - target_lambdas)
@@ -224,12 +224,12 @@ test_that("single iteration works", {
 #
 #   # with an identity matrix it should converge instantly
 #   iterates <- iterate_matrix(matrix = diag(n))
-#   converged <- calculate(iterates$converged)
+#   converged <- calculate(iterates$converged)[[1]]
 #   expect_true(converged == 1)
 #
 #   # with tolerance of 0, it should time out
 #   iterates <- iterate_matrix(matrix = randu(n, n), tol = 0)
-#   converged <- calculate(iterates$converged)
+#   converged <- calculate(iterates$converged)[[1]]
 #   expect_false(converged == 1)
 #
 # })
