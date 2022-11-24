@@ -78,7 +78,7 @@ iterate_dynamic_function <- function(
   ...,
   parameter_is_time_varying = c(),
   state_limits = c(-Inf, Inf)
-) {
+  ) {
 
   # generalise checking of inputs from iterate_matrix into functions
   niter <- as.integer(niter)
@@ -96,6 +96,7 @@ iterate_dynamic_function <- function(
       "{.var initial_state} must be either a column vector, or a 3D array \\
       with final dimension 1"
     )
+
   }
 
   # if this is multisite
@@ -216,6 +217,7 @@ as_tf_transition_function <- function (transition_function, state, iter, dots) {
 
     # tf_dots will have been added to this environment by
     # tf_iterate_dynamic_function
+    # tf_iterate_dynamic_matrix
     args <- list(state = state, iter = iter)
     do.call(tf_fun, c(args, tf_dots))
 
@@ -287,7 +289,6 @@ tf_iterate_dynamic_function <- function (state,
     }
     assign("tf_dots", tf_dots,
            environment(tf_transition_function))
-
     # evaluate function to get the new state (dots have been inserted into its
     # environment, since TF while loops are treacherous things)
     new_state <- tf_transition_function(old_state, iter)

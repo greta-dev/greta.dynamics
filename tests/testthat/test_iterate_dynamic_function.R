@@ -1,7 +1,6 @@
 test_that("single iteration works", {
   skip_if_not(check_tf_version())
   set.seed(2017 - 05 - 01)
-
   n <- 4
   init <- rep(1, n)
   niter <- 100
@@ -59,8 +58,6 @@ test_that("single iteration works", {
   expect_lt(greta_iterations, niter)
 
 })
-
-
 
 test_that("iteration works with time-varying parameters", {
   skip_if_not(check_tf_version())
