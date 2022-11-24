@@ -79,6 +79,31 @@ r_iterate_dynamic_matrix <- function (matrix_function, initial_state, niter = 10
        max_iter = i)
 }
 
+r_iterate_dynamic_function <- function(transition_function, initial_state, niter = 100, tol = 1e-6, ...) {
+
+  states <- list(initial_state)
+
+  i <- 0L
+  diff <- Inf
+
+  while(i < niter & diff > tol) {
+    i <- i + 1L
+    states[[i + 1]] <- transition_function(states[[i]], i, ...)
+    growth <- states[[i + 1]] / states[[i]]
+    diffs <- growth - 1
+    diff <- max(abs(diffs))
+  }
+
+  all_states <- matrix(0, length(states[[1]]), niter)
+  states_keep <- states[-1]
+  all_states[, seq_along(states_keep)] <- t(do.call(rbind, states_keep))
+
+  list(stable_state = states[[i]],
+       all_states = all_states,
+       converged = as.integer(diff < tol),
+       max_iter = i)
+}
+
 # a midpoint solver for use in deSolve, from the vignette p8
 rk_midpoint <- deSolve::rkMethod(
   ID = "midpoint",

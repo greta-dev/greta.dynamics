@@ -46,8 +46,8 @@ if \code{converged} is \code{FALSE}.}
 }
 \description{
 Calculate the intrinsic growth rate(s) and stable stage
-  distribution(s) for a stage-structured dynamical system, encoded by a
-  transition matrix, where: \code{state[t] = matrix \%*\% state[t-1]}.
+distribution(s) for a stage-structured dynamical system, encoded
+as \verb{state_t = matrix \\\%*\\\% state_tm1}.
 }
 \details{
 \code{iterate_matrix} can either act on a single transition matrix
