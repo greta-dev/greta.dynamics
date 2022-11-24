@@ -2,3 +2,8 @@
 ^\.Rproj\.user$
 .travis.yml
 ^\.github$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
+^cran-comments\.md$
+^LICENSE\.md$

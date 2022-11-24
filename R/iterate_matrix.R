@@ -402,7 +402,7 @@ growth_converged <- function(growth_rates, tol) {
 }
 
 is_valid <- function(x) {
-  valid_stages <- tf$logical_and(is_non_zero(x), tf$is_finite(x))
+  valid_stages <- tf$logical_and(is_non_zero(x), tf$math$is_finite(x))
   reduce_axes <- 1:2 + length(dim(x)) - 3L
   tf$reduce_all(valid_stages, axis = reduce_axes)
 }

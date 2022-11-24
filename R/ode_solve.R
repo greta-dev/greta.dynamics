@@ -17,6 +17,8 @@
 #'   sizes, whilst `"rk4"` and `"midpoint"` use the fixed grid defined
 #'   by `times`; they may be faster but less accurate than `"ode45"`.
 #'
+#' @return greta array
+#'
 #' @export
 #'
 #' @examples

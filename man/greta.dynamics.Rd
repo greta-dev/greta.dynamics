@@ -5,7 +5,7 @@
 \alias{greta.dynamics}
 \title{greta.dynamics: a greta extension for modelling dynamical systems}
 \description{
-an extension to \href{https://greta-dev.github.io/greta}{greta}
+an extension to \href{https://greta-stats.org/}{greta}
 with functions for simulating dynamical systems, defined by of ordinary
 differential equations (see \code{\link[=ode_solve]{ode_solve()}}) or transition matrices
 (\code{\link[=iterate_matrix]{iterate_matrix()}}).
