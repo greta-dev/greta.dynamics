@@ -73,7 +73,7 @@ r_iterate_dynamic_matrix <- function (matrix_function, initial_state, niter = 10
   states_keep <- states[-1]
   all_states[, seq_along(states_keep)] <- t(do.call(rbind, states_keep))
 
-  list(stable_state = states[[i]],
+  list(stable_state = states[[i + 1]],
        all_states = all_states,
        converged = as.integer(diff < tol),
        max_iter = i)
@@ -109,7 +109,7 @@ r_iterate_dynamic_function <- function(transition_function,
   states_keep <- states[-1]
   all_states[, seq_along(states_keep)] <- t(do.call(rbind, states_keep))
 
-  list(stable_state = states[[i]],
+  list(stable_state = states[[i + 1]],
        all_states = all_states,
        converged = as.integer(diff < tol),
        max_iter = i)
