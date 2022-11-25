@@ -21,7 +21,7 @@
 #'
 #' @param transition_function a function taking in the previous population state
 #'   and the current iteration (and possibly other greta arrays) and returning
-#'   the populationstate at the next iteration. The first two arguments must be
+#'   the population state at the next iteration. The first two arguments must be
 #'   named 'state' and 'iter', the state vector and scalar iteration number
 #'   respectively. The remaining parameters must be named arguments representing
 #'   (temporally static) model parameters. Variables and distributions cannot be
@@ -35,6 +35,11 @@
 #'   is determined to have converged to a stable population size in all stages
 #' @param ... optional named arguments to \code{matrix_function}, giving greta
 #'   arrays for additional parameters
+#' @param parameter_is_time_varying a character vector naming the parameters
+#'   (ie. the named arguments of the function that are passed via `...`) that
+#'   should be considered to be time-varying. That is, at each iteration only
+#'   the corresponding slice from the first dimension of the object apassed in
+#'   should be used at that iteration.
 #'
 #' @return a named list with four greta arrays:
 #' \itemize{
@@ -66,7 +71,8 @@ iterate_dynamic_function <- function(
   initial_state,
   niter,
   tol,
-  ...
+  ...,
+  parameter_is_time_varying = c()
 ) {
 
   # generalise checking of inputs from iterate_matrix into functions
@@ -95,6 +101,16 @@ iterate_dynamic_function <- function(
   # create a tensorflow function from the transition function
   dots <- list(...)
   dots <- lapply(dots, as.greta_array)
+
+  # handle time-varying parameters, sending only a slice to the function when
+  # converting to TF
+  for (name in parameter_is_time_varying) {
+    dots[[name]] <- slice_first_dim(dots[[name]], 1)
+  }
+
+  # get index to time-varying parameters in a list
+  parameter_is_time_varying_index <- match(parameter_is_time_varying, names(dots))
+
   tf_transition_function <- as_tf_transition_function(transition_function, state, iter = as_data(1), dots)
 
   # op returning a fake greta array which is actually a list containing both
@@ -105,7 +121,8 @@ iterate_dynamic_function <- function(
                 operation_args = list(
                   tf_transition_function = tf_transition_function,
                   niter = niter,
-                  tol = tol
+                  tol = tol,
+                  parameter_is_time_varying_index = parameter_is_time_varying_index
                 ),
                 tf_operation = "tf_iterate_dynamic_function",
                 dim = c(1, 1))
@@ -176,14 +193,28 @@ as_tf_transition_function <- function (transition_function, state, iter, dots) {
 # tensorflow code
 # iterate matrix tensor `matrix` `niter` times, each time using and updating vector
 # tensor `state`, and return lambda for the final iteration
-tf_iterate_dynamic_function <- function (state, ..., tf_transition_function, niter, tol) {
+tf_iterate_dynamic_function <- function (state,
+                                         ...,
+                                         tf_transition_function,
+                                         niter,
+                                         tol,
+                                         parameter_is_time_varying_index) {
 
   # assign the dots (as tensors) to the matrix function's environment
-  assign("tf_dots", list(...),
+  assign("tf_dots",
+         list(...),
          environment(tf_transition_function))
 
   # use a tensorflow while loop to do the recursion:
   body <- function(old_state, t_all_states, growth_rates, converged, iter, maxiter) {
+
+    # slice up the relevant parameters dots as needed
+    tf_dots <- environment(tf_transition_function)$tf_dots
+    for(index in parameter_is_time_varying_index) {
+      tf_dots[[index]] <- tf_slice_first_dim(tf_dots[[index]], iter)
+    }
+    assign("tf_dots", tf_dots,
+           environment(tf_transition_function))
 
     # evaluate function to get the new state (dots have been inserted into its
     # environment, since TF while loops are treacherous things)
@@ -299,3 +330,46 @@ tf_extract_stable_population <- function (results) {
 
 }
 
+# given a greta array, tensor, or array, extract the 'element'th element on
+# the first dimmension, preserving all other dimensions
+slice_first_dim <- function(x, element) {
+  # if it's a vector, just return like this
+  if (is.vector(x)) {
+    return(x[element])
+  }
+  # if this is a tensor with a batch dimension to skip, add a comma before the
+  # element, and drop one after
+  ndim <- length(dim(x))
+
+  pre_commas <- 0
+  post_commas <- ndim - 1
+
+  pre <- paste0(rep(",", pre_commas), collapse = "")
+  # calculate the nuber of commas to go after the element
+  post <- paste0(rep(",", post_commas), collapse = "")
+  # create and evaluate the command
+  command <- paste0("x[", pre, "element", post, ", drop = FALSE", "]")
+  eval(parse(text = command))
+}
+
+
+tf_slice_first_dim <- function(x, element) {
+
+  element <- tf$squeeze(element)
+
+  # extract on the first dimension, skipping the batch dimmension
+  x_out <- tf$gather(x, element, axis = 1L)
+
+  # this drops a dimension, so reinstate it if the dimension is too small for a
+  # greta array
+  n_dim <- length(dim(x_out))
+  if (n_dim == 2) {
+    x_out <- tf$expand_dims(x_out, axis = 2L)
+  }
+
+  x_out
+
+}
+
+# drop is ignored when element is a tensor. Use an alternate slicing interface
+# for the tensorflow version?

@@ -79,16 +79,27 @@ r_iterate_dynamic_matrix <- function (matrix_function, initial_state, niter = 10
        max_iter = i)
 }
 
-r_iterate_dynamic_function <- function(transition_function, initial_state, niter = 100, tol = 1e-6, ...) {
+r_iterate_dynamic_function <- function(transition_function,
+                                       initial_state,
+                                       niter = 100,
+                                       tol = 1e-6,
+                                       ...,
+                                       parameter_is_time_varying = c()) {
 
   states <- list(initial_state)
 
   i <- 0L
   diff <- Inf
+  dots <- list(...)
 
   while(i < niter & diff > tol) {
     i <- i + 1L
-    states[[i + 1]] <- transition_function(states[[i]], i, ...)
+    # slice up time-varying ones
+    these_dots <- dots
+    for (name in parameter_is_time_varying) {
+      these_dots[[name]] <- greta.dynamics:::slice_first_dim(these_dots[[name]], i)
+    }
+    states[[i + 1]] <- do.call(transition_function, c(list(states[[i]], i), these_dots))
     growth <- states[[i + 1]] / states[[i]]
     diffs <- growth - 1
     diff <- max(abs(diffs))
