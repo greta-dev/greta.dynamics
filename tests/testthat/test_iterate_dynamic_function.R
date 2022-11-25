@@ -78,7 +78,6 @@ test_that("iteration works with time-varying parameters", {
   fun <- function(state, iter, x) {
 
     # make fecundity a Ricker-like function of the total population, with random
-    # fluctuations on each state
     Nt <- sum(state)
     K <- 100
     ratio <- exp(1 - Nt / K)
@@ -97,6 +96,7 @@ test_that("iteration works with time-varying parameters", {
     parameter_is_time_varying = "x"
   )
 
+  # target_stable <- r_iterates$stable_state
   target_states <- r_iterates$all_states
 
   # greta version
@@ -109,10 +109,24 @@ test_that("iteration works with time-varying parameters", {
     parameter_is_time_varying = "x"
   )
 
+  # states <- iterates$all_states
+  stable <- iterates$stable_population
   states <- iterates$all_states
+  converged <- iterates$converged
+  iterations <- iterates$iterations
+
+  greta_stable <- calculate(stable)[[1]]
+  difference <- abs(greta_stable - target_stable)
+  expect_true(all(difference < test_tol))
 
   greta_states <- calculate(states)[[1]]
   difference <- abs(greta_states - target_states)
   expect_true(all(difference < test_tol))
+
+  greta_converged <- calculate(converged)[[1]]
+  expect_true(greta_converged == 1)
+
+  greta_iterations <- calculate(iterations)[[1]]
+  expect_lt(greta_iterations, niter)
 
 })

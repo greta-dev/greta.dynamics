@@ -280,6 +280,14 @@ tf_iterate_dynamic_function <- function (state,
            batch_size,
            envir = greta::.internals$greta_stash)
 
+    # slice up the relevant parameters dots as needed
+    tf_dots <- environment(tf_transition_function)$tf_dots
+    for(index in parameter_is_time_varying_index) {
+      tf_dots[[index]] <- tf_slice_first_dim(tf_dots[[index]], iter)
+    }
+    assign("tf_dots", tf_dots,
+           environment(tf_transition_function))
+
     # evaluate function to get the new state (dots have been inserted into its
     # environment, since TF while loops are treacherous things)
     new_state <- tf_transition_function(old_state, iter)
@@ -411,7 +419,6 @@ tf_extract_stable_population <- function (results) {
 # given a greta array, tensor, or array, extract the 'element'th element on
 # the first dimmension, preserving all other dimensions
 slice_first_dim <- function(x, element) {
-
   # if it's a vector, just return like this
   if (is.vector(x)) {
     return(x[element])
@@ -460,3 +467,6 @@ tf_slice_first_dim <- function(x, element) {
   x_out
 
 }
+
+# drop is ignored when element is a tensor. Use an alternate slicing interface
+# for the tensorflow version?
