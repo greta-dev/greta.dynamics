@@ -105,7 +105,12 @@ iterate_dynamic_function <- function(
   # handle time-varying parameters, sending only a slice to the function when
   # converting to TF
   for (name in parameter_is_time_varying) {
-    dots[[name]] <- slice_first_dim(dots[[name]], 1)
+    res <- slice_first_dim(dots[[name]], 1)
+    # if the array is 2d, transpose it so it's a column vector not a row vector
+    if (length(dim(res)) == 2) {
+      res <- t(res)
+    }
+    dots[[name]] <- res
   }
 
   # get index to time-varying parameters in a list
