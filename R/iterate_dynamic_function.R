@@ -102,6 +102,12 @@ iterate_dynamic_function <- function(
   dots <- list(...)
   dots <- lapply(dots, as.greta_array)
 
+  if (length(dots) > 1 && is.null(names(dots))) {
+    stop("all arguments passed to the transition function ",
+         "must be explicitly named",
+         call. = FALSE)
+  }
+
   # handle time-varying parameters, sending only a slice to the function when
   # converting to TF
   for (name in parameter_is_time_varying) {
