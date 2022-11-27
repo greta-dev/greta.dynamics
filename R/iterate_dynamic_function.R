@@ -99,8 +99,11 @@ iterate_dynamic_function <- function(
   state_multisite <- state_n_dim == 3
 
   # create a tensorflow function from the transition function
-  dots <- list(...)
-  dots <- lapply(dots, as.greta_array)
+
+  # make dummy coopies of these now, so we can slice and reshape them without
+  # modifying the greta arrays and tensors in place
+  # dots <- lapply(dots, as.greta_array)
+  dots <- lapply(list(...), dummy_greta_array)
 
   if (length(dots) > 1 && is.null(names(dots))) {
     stop("all arguments passed to the transition function ",
@@ -111,12 +114,7 @@ iterate_dynamic_function <- function(
   # handle time-varying parameters, sending only a slice to the function when
   # converting to TF
   for (name in parameter_is_time_varying) {
-    res <- slice_first_dim(dots[[name]], 1)
-    # if the array is 2d, transpose it so it's a column vector not a row vector
-    if (length(dim(res)) == 2) {
-      res <- t(res)
-    }
-    dots[[name]] <- res
+    dots[[name]] <- slice_first_dim(dots[[name]], 1)
   }
 
   # get index to time-varying parameters in a list
@@ -344,6 +342,7 @@ tf_extract_stable_population <- function (results) {
 # given a greta array, tensor, or array, extract the 'element'th element on
 # the first dimmension, preserving all other dimensions
 slice_first_dim <- function(x, element) {
+
   # if it's a vector, just return like this
   if (is.vector(x)) {
     return(x[element])
@@ -359,8 +358,19 @@ slice_first_dim <- function(x, element) {
   # calculate the nuber of commas to go after the element
   post <- paste0(rep(",", post_commas), collapse = "")
   # create and evaluate the command
-  command <- paste0("x[", pre, "element", post, ", drop = FALSE", "]")
-  eval(parse(text = command))
+  command <- paste0("x[", pre, "element", post, "]")
+  result <- eval(parse(text = command))
+
+  # if there are more than two dimensions, drop the first one
+  if (ndim > 2) {
+    dim(result) <- dim(x)[-1]
+  } else if (ndim == 2) {
+    # if there are exactly two dimensions, transpose it so that each slice is a
+    # column vector rather than a row vector
+    result <- t(result)
+  }
+
+  result
 }
 
 
@@ -372,7 +382,7 @@ tf_slice_first_dim <- function(x, element) {
   x_out <- tf$gather(x, element, axis = 1L)
 
   # this drops a dimension, so reinstate it if the dimension is too small for a
-  # greta array
+  # greta array - this sets it as a coumn vector too.
   n_dim <- length(dim(x_out))
   if (n_dim == 2) {
     x_out <- tf$expand_dims(x_out, axis = 2L)
@@ -381,6 +391,3 @@ tf_slice_first_dim <- function(x, element) {
   x_out
 
 }
-
-# drop is ignored when element is a tensor. Use an alternate slicing interface
-# for the tensorflow version?

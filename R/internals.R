@@ -33,3 +33,4 @@ fl <- .internals$utils$misc$fl
 op <- .internals$nodes$constructors$op
 to_shape <- .internals$utils$misc$to_shape
 expand_to_batch <- .internals$utils$misc$expand_to_batch
+dummy_greta_array <- .internals$utils$dummy_arrays$dummy_greta_array
