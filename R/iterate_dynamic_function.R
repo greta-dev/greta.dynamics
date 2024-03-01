@@ -191,7 +191,7 @@ as_tf_transition_function <- function (transition_function, state, iter, dots) {
     iter <- tf$reshape(iter, shape = shape(1, 1, 1))
 
     # tf_dots will have been added to this environment by
-    # tf_iterate_dynamic_matrix
+    # tf_iterate_dynamic_function
     args <- list(state = state, iter = iter)
     do.call(tf_fun, c(args, tf_dots))
 
@@ -209,18 +209,29 @@ tf_iterate_dynamic_function <- function (state,
                                          tol,
                                          parameter_is_time_varying_index) {
 
-  # assign the dots (as tensors) to the matrix function's environment
+  # define the tf versions of the dots (all other parameters) here
+  tf_dots_all <- list(...)
+
+  # assign these to the transition function's environment so they can be used
   assign("tf_dots",
          list(...),
          environment(tf_transition_function))
 
+  # note that for time-varying parameters these are too big (full timeseries), so
+  # inside the body (each iteration) we will re-slice and replace them each time
+
   # use a tensorflow while loop to do the recursion:
   body <- function(old_state, t_all_states, growth_rates, converged, iter, maxiter) {
 
-    # slice up the relevant parameters dots as needed
+    # get all the tf dots from the function environment
     tf_dots <- environment(tf_transition_function)$tf_dots
+
+    # for the time-varying ones, get the full timeseries from the
+    # tf_iterate_dynamic_function (via lexical scoping), slice out the elements
+    # for this loop, and put them back in the tf_dots in the function
+    # environment
     for(index in parameter_is_time_varying_index) {
-      tf_dots[[index]] <- tf_slice_first_dim(tf_dots[[index]], iter)
+      tf_dots[[index]] <- tf_slice_first_dim(tf_dots_all[[index]], iter)
     }
     assign("tf_dots", tf_dots,
            environment(tf_transition_function))
