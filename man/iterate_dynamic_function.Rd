@@ -4,12 +4,20 @@
 \alias{iterate_dynamic_function}
 \title{iterate dynamic transition functions}
 \usage{
-iterate_dynamic_function(transition_function, initial_state, niter, tol, ...)
+iterate_dynamic_function(
+  transition_function,
+  initial_state,
+  niter,
+  tol,
+  ...,
+  parameter_is_time_varying = c(),
+  state_limits = c(-Inf, Inf)
+)
 }
 \arguments{
 \item{transition_function}{a function taking in the previous population state
 and the current iteration (and possibly other greta arrays) and returning
-the populationstate at the next iteration. The first two arguments must be
+the population state at the next iteration. The first two arguments must be
 named 'state' and 'iter', the state vector and scalar iteration number
 respectively. The remaining parameters must be named arguments representing
 (temporally static) model parameters. Variables and distributions cannot be
@@ -27,6 +35,17 @@ is determined to have converged to a stable population size in all stages}
 
 \item{...}{optional named arguments to \code{matrix_function}, giving greta
 arrays for additional parameters}
+
+\item{parameter_is_time_varying}{a character vector naming the parameters
+(ie. the named arguments of the function that are passed via \code{...}) that
+should be considered to be time-varying. That is, at each iteration only
+the corresponding slice from the first dimension of the object apassed in
+should be used at that iteration.}
+
+\item{state_limits}{a numeric vector of length 2 giving minimum and maximum
+values at which to clamp the values of state after each iteration to
+prevent numerical under/overflow; i.e. elements with values below the
+minimum (maximum) will be set to the minimum (maximum).}
 }
 \value{
 a named list with four greta arrays:
