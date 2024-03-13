@@ -4,7 +4,14 @@
 \alias{iterate_dynamic_matrix}
 \title{iterate dynamic transition matrices}
 \usage{
-iterate_dynamic_matrix(matrix_function, initial_state, niter, tol, ...)
+iterate_dynamic_matrix(
+  matrix_function,
+  initial_state,
+  niter,
+  tol,
+  ...,
+  state_limits = c(-Inf, Inf)
+)
 }
 \arguments{
 \item{matrix_function}{a function taking in the previous population state and
@@ -27,6 +34,11 @@ is determined to have converged to a stable population size in all stages}
 
 \item{...}{optional named arguments to \code{matrix_function}, giving greta
 arrays for additional parameters}
+
+\item{state_limits}{a numeric vector of length 2 giving minimum and maximum
+values at which to clamp the values of state after each iteration to
+prevent numerical under/overflow; i.e. elements with values below the
+minimum (maximum) will be set to the minimum (maximum).}
 }
 \value{
 a named list with four greta arrays:

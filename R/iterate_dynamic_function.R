@@ -40,6 +40,10 @@
 #'   should be considered to be time-varying. That is, at each iteration only
 #'   the corresponding slice from the first dimension of the object apassed in
 #'   should be used at that iteration.
+#' @param state_limits a numeric vector of length 2 giving minimum and maximum
+#'   values at which to clamp the values of state after each iteration to
+#'   prevent numerical under/overflow; i.e. elements with values below the
+#'   minimum (maximum) will be set to the minimum (maximum).
 #'
 #' @return a named list with four greta arrays:
 #' \itemize{
@@ -72,7 +76,8 @@ iterate_dynamic_function <- function(
   niter,
   tol,
   ...,
-  parameter_is_time_varying = c()
+  parameter_is_time_varying = c(),
+  state_limits = c(-Inf, Inf)
 ) {
 
   # generalise checking of inputs from iterate_matrix into functions
@@ -131,7 +136,8 @@ iterate_dynamic_function <- function(
                   tf_transition_function = tf_transition_function,
                   niter = niter,
                   tol = tol,
-                  parameter_is_time_varying_index = parameter_is_time_varying_index
+                  parameter_is_time_varying_index = parameter_is_time_varying_index,
+                  state_limits = state_limits
                 ),
                 tf_operation = "tf_iterate_dynamic_function",
                 dim = c(1, 1))
@@ -207,7 +213,8 @@ tf_iterate_dynamic_function <- function (state,
                                          tf_transition_function,
                                          niter,
                                          tol,
-                                         parameter_is_time_varying_index) {
+                                         parameter_is_time_varying_index,
+                                         state_limits) {
 
   # define the tf versions of the dots (all other parameters) here
   tf_dots_all <- list(...)
@@ -259,6 +266,11 @@ tf_iterate_dynamic_function <- function (state,
     # environment, since TF while loops are treacherous things)
     new_state <- tf_transition_function(old_state, iter)
 
+    # clamp to max and min
+    new_state <- tf$clip_by_value(new_state,
+                                  clip_value_min = tf_min,
+                                  clip_value_max = tf_max)
+
     # store new state object
     t_all_states <- tf$tensor_scatter_nd_update(
       tensor = t_all_states,
@@ -291,6 +303,12 @@ tf_iterate_dynamic_function <- function (state,
   # add convergence tolerance and indicator
   tf_tol <- tf$constant(tol, dtype = tf_float())
   converged <- tf$constant(FALSE, dtype = tf$bool)
+
+  # coerce limits to max and min
+  tf_min <- tf$constant(state_limits[1],
+                        dtype = tf_float())
+  tf_max <- tf$constant(state_limits[2],
+                        dtype = tf_float())
 
   # create an empty tensor for (the transpose of) the array of all state values
 

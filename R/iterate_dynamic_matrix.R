@@ -42,6 +42,10 @@
 #'   is determined to have converged to a stable population size in all stages
 #' @param ... optional named arguments to \code{matrix_function}, giving greta
 #'   arrays for additional parameters
+#' @param state_limits a numeric vector of length 2 giving minimum and maximum
+#'   values at which to clamp the values of state after each iteration to
+#'   prevent numerical under/overflow; i.e. elements with values below the
+#'   minimum (maximum) will be set to the minimum (maximum).
 #'
 #' @return a named list with four greta arrays:
 #' \itemize{
@@ -73,7 +77,8 @@ iterate_dynamic_matrix <- function(
   initial_state,
   niter,
   tol,
-  ...
+  ...,
+  state_limits = c(-Inf, Inf)
 ) {
 
   # generalise checking of inputs from iterate_matrix into functions
@@ -112,7 +117,8 @@ iterate_dynamic_matrix <- function(
                 operation_args = list(
                   tf_matrix_function = tf_matrix_function,
                   niter = niter,
-                  tol = tol
+                  tol = tol,
+                  state_limits = state_limits
                 ),
                 tf_operation = "tf_iterate_dynamic_matrix",
                 dim = c(1, 1))
@@ -183,7 +189,8 @@ as_tf_matrix_function <- function (matrix_function, state, iter, dots) {
 # tensorflow code
 # iterate matrix tensor `matrix` `niter` times, each time using and updating vector
 # tensor `state`, and return lambda for the final iteration
-tf_iterate_dynamic_matrix <- function (state, ..., tf_matrix_function, niter, tol) {
+tf_iterate_dynamic_matrix <- function (state, ..., tf_matrix_function, niter, tol,
+                                       state_limits) {
 
   # assign the dots (as tensors) to the matrix function's environment
   assign("tf_dots", list(...),
@@ -212,6 +219,11 @@ tf_iterate_dynamic_matrix <- function (state, ..., tf_matrix_function, niter, to
 
     # do matrix multiplication
     new_state <- tf$matmul(matrix, old_state, transpose_a = FALSE)
+
+    # clamp to max and min
+    new_state <- tf$clip_by_value(new_state,
+                                  clip_value_min = tf_min,
+                                  clip_value_max = tf_max)
 
     # store new state object
     t_all_states <- tf$tensor_scatter_nd_update(
@@ -245,6 +257,12 @@ tf_iterate_dynamic_matrix <- function (state, ..., tf_matrix_function, niter, to
   # add convergence tolerance and indicator
   tf_tol <- tf$constant(tol, dtype = tf_float())
   converged <- tf$constant(FALSE, dtype = tf$bool)
+
+  # coerce limits to max and min
+  tf_min <- tf$constant(state_limits[1],
+                        dtype = tf_float())
+  tf_max <- tf$constant(state_limits[2],
+                        dtype = tf_float())
 
   # make a single slice (w.r.t. batch dimension) and tile along batch dimension
   state_dim <- dim(state)[-1]
