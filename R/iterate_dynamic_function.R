@@ -221,7 +221,12 @@ tf_iterate_dynamic_function <- function (state,
   # inside the body (each iteration) we will re-slice and replace them each time
 
   # use a tensorflow while loop to do the recursion:
-  body <- function(old_state, t_all_states, growth_rates, converged, iter, maxiter) {
+  body <- function(old_state,
+                   t_all_states,
+                   growth_rates,
+                   converged,
+                   iter,
+                   maxiter) {
 
     # get all the tf dots from the function environment
     tf_dots <- environment(tf_transition_function)$tf_dots
@@ -235,6 +240,20 @@ tf_iterate_dynamic_function <- function (state,
     }
     assign("tf_dots", tf_dots,
            environment(tf_transition_function))
+
+    # look up the batch size from old_state and put it in the greta stash, so
+    # greta can use it to appropriately create tensors for constants defined in
+    # the user-provided function. Note we need to do this inside body (not
+    # before), because a new control flow graph is created by tf_while_loop and
+    # it otherwise becomes an unknown and causes shape variance
+    batch_size <- tf$shape(old_state)[[0]]
+
+    # note we need to access the greta stash directly here, rather than including
+    # it in internals.R, because otherwise it makes a copy of the environment
+    # instead and the contents can't be accessed by greta:::as_tf_function()
+    assign("batch_size",
+           batch_size,
+           envir = greta::.internals$greta_stash)
 
     # evaluate function to get the new state (dots have been inserted into its
     # environment, since TF while loops are treacherous things)
@@ -273,17 +292,20 @@ tf_iterate_dynamic_function <- function (state,
   tf_tol <- tf$constant(tol, dtype = tf_float())
   converged <- tf$constant(FALSE, dtype = tf$bool)
 
-  # make a single slice (w.r.t. batch dimension) and tile along batch dimension
+  # create an empty tensor for (the transpose of) the array of all state values
+
+  # first make a single slice (w.r.t. batch dimension) and then tile the final
+  # dimension along batch dimension
   state_dim <- dim(state)[-1]
   n_dim <- length(state_dim)
-
   shp <- to_shape(c(niter, rev(state_dim[-n_dim]), 1))
   t_all_states_slice <- tf$zeros(shp, dtype = tf_float())
   batch_size <- tf$shape(state)[[0]]
   ndim <- length(dim(t_all_states_slice))
   t_all_states <- tf$tile(t_all_states_slice, c(rep(1L, ndim - 1), batch_size))
 
-  # create an initial growth rate, and expand its batches
+  # create an initial growth rate, and expand its batches too (easier because
+  # this isn't the transpose so we tile the first dimension along batches)
   shp <- to_shape(c(1, state_dim))
   growth_rates_slice <- tf$zeros(shp, dtype = tf_float())
   growth_rates <- expand_to_batch(growth_rates_slice, state)

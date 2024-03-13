@@ -192,6 +192,20 @@ tf_iterate_dynamic_matrix <- function (state, ..., tf_matrix_function, niter, to
   # use a tensorflow while loop to do the recursion:
   body <- function(old_state, t_all_states, growth_rates, converged, iter, maxiter) {
 
+    # look up the batch size from old_state and put it in the greta stash, so
+    # greta can use it to appropriately create tensors for constants defined in
+    # the user-provided function. Note we need to do this inside body (not
+    # before), because a new control flow graph is created by tf_while_loop and
+    # it otherwise becomes an unknown and causes shape variance
+    batch_size <- tf$shape(old_state)[[0]]
+
+    # note we need to access the greta stash directly here, rather than including
+    # it in internals.R, because otherwise it makes a copy of the environment
+    # instead and the contents can't be accessed by greta:::as_tf_function()
+    assign("batch_size",
+           batch_size,
+           envir = greta::.internals$greta_stash)
+
     # create matrix (dots have been inserted into its environment, since TF
     # while loops are treacherous things)
     matrix <- tf_matrix_function(old_state, iter)
