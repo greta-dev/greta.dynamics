@@ -9,8 +9,7 @@
 #' @importFrom greta .internals abind
 #' @importFrom tensorflow tf shape
 #'
-#' @docType package
-NULL
+"_PACKAGE"
 
 # crate the node list object whenever the package is loaded
 .onLoad <- function(libname, pkgname) {

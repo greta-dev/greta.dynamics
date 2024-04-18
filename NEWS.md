@@ -1,4 +1,6 @@
-# greta.dynamics (development version)
+# greta.dynamics 0.2.1
+
+* Use sentinel "_PACKAGE"
 
 # greta.dynamics 0.2.0
 
