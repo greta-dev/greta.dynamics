@@ -1,4 +1,4 @@
-context("iteration functions")
+context("static matrix iteration")
 
 test_that("single iteration works", {
   skip_if_not(greta:::check_tf_version())
@@ -12,12 +12,10 @@ test_that("single iteration works", {
   test_tol <- tol * 10
 
   # r version
-  r_iterates <- r_iterate_matrix(
-    matrix = mat,
-    state = init,
-    niter = niter,
-    tol = tol
-  )
+  r_iterates <- r_iterate_matrix(matrix = mat,
+                                 initial_state = init,
+                                 niter = niter,
+                                 tol = tol)
 
   target_lambda <- r_iterates$lambda
   target_stable <- r_iterates$stable_distribution
@@ -71,20 +69,18 @@ test_that("vectorised matrix iteration works", {
 
   # r version
   target_iterates <- lapply(mat_list,
-    r_iterate_matrix,
-    state = init,
-    niter = niter,
-    tol = tol
-  )
+                            r_iterate_matrix,
+                            initial_state = init,
+                            niter = niter,
+                            tol = tol)
 
   target_lambdas <- sapply(target_iterates, function(x) x$lambda)
   target_stable <- t(sapply(target_iterates, function(x) x$stable_distribution))
 
   iterates <- iterate_matrix(mat,
-    initial_state = init,
-    niter = niter,
-    tol = tol
-  )
+                             initial_state = init,
+                             niter = niter,
+                             tol = tol)
   greta_lambdas <- calculate(iterates$lambda)[[1]]
   greta_stable <- calculate(iterates$stable_distribution)[[1]]
   dim(greta_stable) <- dim(greta_stable)[1:2]
