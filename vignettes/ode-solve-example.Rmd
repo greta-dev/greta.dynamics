@@ -47,7 +47,10 @@ pars <- c(
 
 yini <- c(Prey = 1, Predator = 2)
 times <- seq(0, 30, by = 1)
-out <- ode(yini, times, LVmod, pars)
+out <- ode(y = yini, 
+           times = times, 
+           func = LVmod, 
+           parms = pars)
 
 # simulate observations
 jitter <- rnorm(2 * length(times), 0, 0.1)
@@ -86,7 +89,12 @@ y0 <- uniform(0, 5, dim = c(1, 2))
 obs_sd <- uniform(0, 1)
 
 # solution to the ODE
-y <- ode_solve(lotka_volterra, y0, times, rIng, rGrow, rMort, assEff, K)
+y <- ode_solve(
+  derivative = lotka_volterra, 
+  y0 = y0, 
+  times = times, 
+  rIng, rGrow, rMort, assEff, K
+  )
 
 # sampling statement/observation model
 distribution(y_obs) <- normal(y, obs_sd)

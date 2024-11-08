@@ -133,7 +133,12 @@ ode_solve <- function(derivative, y0, times, ...,
   # check the arguments of derivative are valid and match dots
 
   # create a tensorflow version of the function
-  tf_derivative <- as_tf_derivative(derivative, y0, times[1], dots)
+  tf_derivative <- as_tf_derivative(
+    derivative = derivative,
+    y = y0,
+    t = times[1],
+    dots = dots
+    )
 
   # the dimensions should be the dimensions of the y0, duplicated along times
   n_time <- dim(times)[1]
@@ -183,11 +188,13 @@ tf_ode_solve <- function(y0, times, ..., tf_derivative, method) {
     dormand_price = function(...) tf_int$DormandPrince()$solve(...),
   )
 
-  browser()
   ode_fn <- tf_derivative
-  integrator(ode_fn = ode_fn,
-             y_init = y0,
-             )
+  integral <- integrator(
+    ode_fn = tf_derivative,
+    initial_time = times[1],
+    initial_state = y0,
+    solution_times = times
+  )
   dag$on_graph(integral <- integrator(tf_derivative, y0, times))
 
   # reshape to put batch dimension first
@@ -216,7 +223,7 @@ as_tf_derivative <- function(derivative, y, t, dots) {
   tf_dots <- NULL
 
   # return a function acting only on tensors y and t, to feed to the ode solver
-  function(y, t) {
+  function(t, y) {
 
     # t will be dimensionless when used in the ode solver, need to expand out t
     # to have same dim as a scalar constant so that it can be used in the same
@@ -224,7 +231,7 @@ as_tf_derivative <- function(derivative, y, t, dots) {
     t <- tf$reshape(t, shape = shape(1, 1, 1))
 
     # tf_dots will have been added to this environment by tf_ode_solve
-    args <- list(y = y, t = t)
+    args <- list(t = t, y = y)
     do.call(tf_fun, c(args, tf_dots))
   }
 }
