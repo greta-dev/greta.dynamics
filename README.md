@@ -20,7 +20,7 @@ Or install the development version of `greta.dynamics` from
 [r-universe](https://greta-dev.r-universe.dev/ui#builds):
 
 ``` r
-install.packages("greta.dynamics", repos = "https://greta-dev.r-universe.dev")
+install.packages("greta.dynamics", repos = c("https://greta-dev.r-universe.dev", "https://cran.r-project.org"))
 ```
 
 You can also install the development version of `greta.dynamics` via GitHub:

@@ -2,6 +2,7 @@
 % Please edit documentation in R/package.R
 \docType{package}
 \name{greta.dynamics}
+\alias{greta.dynamics-package}
 \alias{greta.dynamics}
 \title{greta.dynamics: a greta extension for modelling dynamical systems}
 \description{
@@ -9,4 +10,22 @@ an extension to \href{https://greta-stats.org/}{greta}
 with functions for simulating dynamical systems, defined by of ordinary
 differential equations (see \code{\link[=ode_solve]{ode_solve()}}) or transition matrices
 (\code{\link[=iterate_matrix]{iterate_matrix()}}).
+}
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/greta-dev/greta.dynamics}
+  \item \url{https://greta-dev.github.io/greta.dynamics/}
+  \item Report bugs at \url{https://github.com/greta-dev/greta.dynamics/issues}
+}
+
+}
+\author{
+\strong{Maintainer}: Nicholas Tierney \email{nicholas.tierney@gmail.com} (\href{https://orcid.org/0000-0003-1460-8722}{ORCID})
+
+Authors:
+\itemize{
+  \item Nick Golding \email{nick.golding.research@gmail.com} (\href{https://orcid.org/0000-0001-8916-5570}{ORCID}) [copyright holder]
+}
+
 }
