@@ -13,9 +13,11 @@
 #' @param times a column vector of times at which to evaluate y
 #' @param ... named arguments giving greta arrays for the additional (fixed)
 #'   parameters
-#' @param method which solver to use. `"ode45"` uses adaptive step
-#'   sizes, whilst `"rk4"` and `"midpoint"` use the fixed grid defined
-#'   by `times`; they may be faster but less accurate than `"ode45"`.
+#' @param method which solver to use. Currently implemented is "bdf", and
+#'   "dp". The "bdf" solver is Backward Differentiation Formula
+#'   (BDF) solver for stiff ODEs. The "dp" solver is Dormand-Prince
+#'   explicit solver for non-stiff ODEs. Currently no arguments for "bdf" or
+#'   "dp" are able to be specified.
 #'
 #' @return greta array
 #'
@@ -111,7 +113,7 @@
 #' o
 #' }
 ode_solve <- function(derivative, y0, times, ...,
-                      method = c("bdf", "dormand_price")) {
+                      method = c("bdf", "dp")) {
   y0 <- as.greta_array(y0)
   times <- as.greta_array(times)
   method <- match.arg(method)
@@ -185,17 +187,17 @@ tf_ode_solve <- function(y0, times, ..., tf_derivative, method) {
 
   integrator <- switch(method,
     bdf = function(...) tf_int$BDF()$solve(...),
-    dormand_price = function(...) tf_int$DormandPrince()$solve(...),
+    dp = function(...) tf_int$DormandPrince()$solve(...),
   )
 
-  ode_fn <- tf_derivative
   integral <- integrator(
     ode_fn = tf_derivative,
     initial_time = times[1],
     initial_state = y0,
     solution_times = times
   )
-  dag$on_graph(integral <- integrator(tf_derivative, y0, times))
+
+  # dag$on_graph(integral <- integrator(tf_derivative, y0, times))
 
   # reshape to put batch dimension first
   permutation <- seq_along(dim(integral)) - 1L
