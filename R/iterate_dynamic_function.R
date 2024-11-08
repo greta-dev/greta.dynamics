@@ -125,7 +125,12 @@ iterate_dynamic_function <- function(
   # get index to time-varying parameters in a list
   parameter_is_time_varying_index <- match(parameter_is_time_varying, names(dots))
 
-  tf_transition_function <- as_tf_transition_function(transition_function, state, iter = as_data(1), dots)
+  tf_transition_function <- as_tf_transition_function(
+    transition_function = transition_function,
+    state = state,
+    iter = as_data(1),
+    dots = dots
+    )
 
   # op returning a fake greta array which is actually a list containing both
   # values and states

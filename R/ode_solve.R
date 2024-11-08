@@ -111,7 +111,7 @@
 #' o
 #' }
 ode_solve <- function(derivative, y0, times, ...,
-                      method = c("ode45", "rk4", "midpoint")) {
+                      method = c("bdf", "dormand_price")) {
   y0 <- as.greta_array(y0)
   times <- as.greta_array(times)
   method <- match.arg(method)
@@ -176,18 +176,18 @@ tf_ode_solve <- function(y0, times, ..., tf_derivative, method) {
   # tf_derivative creates tensors correctly
   dag <- parent.frame()$dag
 
-  tf_int <- tf$contrib$integrate
+  tf_int <- tfp$math$ode
 
   integrator <- switch(method,
-    ode45 = tf_int$odeint,
-    rk4 = function(...) {
-      tf_int$odeint_fixed(..., method = "rk4")
-    },
-    midpoint = function(...) {
-      tf_int$odeint_fixed(..., method = "midpoint")
-    }
+    bdf = function(...) tf_int$BDF()$solve(...),
+    dormand_price = function(...) tf_int$DormandPrince()$solve(...),
   )
 
+  browser()
+  ode_fn <- tf_derivative
+  integrator(ode_fn = ode_fn,
+             y_init = y0,
+             )
   dag$on_graph(integral <- integrator(tf_derivative, y0, times))
 
   # reshape to put batch dimension first
