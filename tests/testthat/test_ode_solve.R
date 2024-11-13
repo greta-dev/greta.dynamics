@@ -79,7 +79,7 @@ test_that("ode_solve works like deSolve::ode", {
   # TODO
   # These values start out a little bit different, I'm wondering if
   # we should discard the first 10 time stamps or so? Or reduce our
-  # expectation doen to <
+  # expectation down to < 1e-2?
   expect_true(all(difference_bdf < 1e-4))
   expect_true(all(difference_dp < 1e-4))
 
