@@ -1,5 +1,12 @@
+## Test environments
+
+* local R installation, R 4.4.2
+* win-builder (devel)
+
 ## R CMD check results
 
-0 errors | 0 warnings | 1 note
+0 errors | 0 warnings | 0 notes
 
-* This is a new release.
+## Submission notes
+
+* Submitted this release to address rlang import issue, and fix breaking changes in underlying TensorFlow 2.0 library.
