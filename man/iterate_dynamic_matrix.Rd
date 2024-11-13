@@ -69,7 +69,7 @@ instead uses a matrix which changes at each iteration, and can be dependent
 on the population sizes after the previous iteration, and the iteration
 number. Because this can encode density-dependence, the dynamics can
 converge to \emph{absolute} population sizes. The convergence criterion is
-therefore based on growth rates conveerging on 0.
+therefore based on growth rates converging on 0.
 
 As in \code{iterate_matrix}, the greta array returned by
 \code{matrix_function} can either be a square matrix, or a 3D array

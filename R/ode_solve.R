@@ -14,7 +14,7 @@
 #' @param ... named arguments giving greta arrays for the additional (fixed)
 #'   parameters
 #' @param method which solver to use. Default is "dp", which is similar to
-#'   deSolves "ode45". Currently implemented is "dp", and "bdf".The "dp" solver
+#'   deSolve's "ode45". Currently implemented is "dp", and "bdf".The "dp" solver
 #'   is Dormand-Prince explicit solver for non-stiff ODEs. The "bdf" solver is
 #'   Backward Differentiation Formula (BDF) solver for stiff ODEs. Currently no
 #'   arguments for "bdf" or "dp" are able to be specified.

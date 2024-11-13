@@ -4,7 +4,7 @@
 
 * updated internal ODE interface to match new tensorflow probability API. This 
   involves now only supporting two solvers, "dp", and "bdf". The Default is 
-  "dp", which is similar to deSolves "ode45".  The "dp" solver is 
+  "dp", which is similar to deSolve's "ode45".  The "dp" solver is 
   Dormand-Prince explicit solver for non-stiff ODEs. The "bdf" solver is
   Backward Differentiation Formula (BDF) solver for stiff ODEs. Currently no
   arguments for "bdf" or "dp" are able to be specified.

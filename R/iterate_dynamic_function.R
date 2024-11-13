@@ -38,7 +38,7 @@
 #' @param parameter_is_time_varying a character vector naming the parameters
 #'   (ie. the named arguments of the function that are passed via `...`) that
 #'   should be considered to be time-varying. That is, at each iteration only
-#'   the corresponding slice from the first dimension of the object apassed in
+#'   the corresponding slice from the first dimension of the object passed in
 #'   should be used at that iteration.
 #' @param state_limits a numeric vector of length 2 giving minimum and maximum
 #'   values at which to clamp the values of state after each iteration to
