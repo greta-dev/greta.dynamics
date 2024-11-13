@@ -4,7 +4,7 @@
 \alias{ode_solve}
 \title{solve ODEs}
 \usage{
-ode_solve(derivative, y0, times, ..., method = c("ode45", "rk4", "midpoint"))
+ode_solve(derivative, y0, times, ..., method = c("dp", "bdf"))
 }
 \arguments{
 \item{derivative}{a derivative function. The first two arguments must be 'y'
@@ -20,9 +20,11 @@ the function.}
 \item{...}{named arguments giving greta arrays for the additional (fixed)
 parameters}
 
-\item{method}{which solver to use. \code{"ode45"} uses adaptive step
-sizes, whilst \code{"rk4"} and \code{"midpoint"} use the fixed grid defined
-by \code{times}; they may be faster but less accurate than \code{"ode45"}.}
+\item{method}{which solver to use. Default is "dp", which is similar to
+deSolves "ode45". Currently implemented is "dp", and "bdf".The "dp" solver
+is Dormand-Prince explicit solver for non-stiff ODEs. The "bdf" solver is
+Backward Differentiation Formula (BDF) solver for stiff ODEs. Currently no
+arguments for "bdf" or "dp" are able to be specified.}
 }
 \value{
 greta array

@@ -13,11 +13,11 @@
 #' @param times a column vector of times at which to evaluate y
 #' @param ... named arguments giving greta arrays for the additional (fixed)
 #'   parameters
-#' @param method which solver to use. Currently implemented is "bdf", and
-#'   "dp". The "bdf" solver is Backward Differentiation Formula
-#'   (BDF) solver for stiff ODEs. The "dp" solver is Dormand-Prince
-#'   explicit solver for non-stiff ODEs. Currently no arguments for "bdf" or
-#'   "dp" are able to be specified.
+#' @param method which solver to use. Default is "dp", which is similar to
+#'   deSolves "ode45". Currently implemented is "dp", and "bdf".The "dp" solver
+#'   is Dormand-Prince explicit solver for non-stiff ODEs. The "bdf" solver is
+#'   Backward Differentiation Formula (BDF) solver for stiff ODEs. Currently no
+#'   arguments for "bdf" or "dp" are able to be specified.
 #'
 #' @return greta array
 #'
@@ -113,7 +113,7 @@
 #' o
 #' }
 ode_solve <- function(derivative, y0, times, ...,
-                      method = c("bdf", "dp")) {
+                      method = c("dp", "bdf")) {
   y0 <- as.greta_array(y0)
   times <- as.greta_array(times)
   method <- match.arg(method)
@@ -121,9 +121,7 @@ ode_solve <- function(derivative, y0, times, ...,
   # check times is a column vector
   t_dim <- dim(times)
   if (length(t_dim != 2) && t_dim[2] != 1) {
-    stop("",
-      call. = FALSE
-    )
+    cli::cli_abort("times must be a column vector")
   }
 
   dots <- list(...)
@@ -186,8 +184,8 @@ tf_ode_solve <- function(y0, times, ..., tf_derivative, method) {
   tf_int <- tfp$math$ode
 
   integrator <- switch(method,
-    bdf = function(...) tf_int$BDF()$solve(...),
     dp = function(...) tf_int$DormandPrince()$solve(...),
+    bdf = function(...) tf_int$BDF()$solve(...)
   )
 
   integral <- integrator(
