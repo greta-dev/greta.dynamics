@@ -88,16 +88,14 @@ iterate_dynamic_function <- function(
   state_dim <- dim(state)
   state_n_dim <- length(state_dim)
 
-  if (!state_n_dim %in% 2:3) {
-    stop ("state must be either two- or three-dimensional",
-          call. = FALSE)
-  }
+  check_state_is_2d_or_3d(state_n_dim)
 
-  # ensure the last dim of state is 1
-  if (state_dim[state_n_dim] != 1) {
-    stop ("initial_state must be either a column vector, ",
-          "or a 3D array with final dimension 1",
-          call. = FALSE)
+  last_dim_of_state_is_not_1 <- state_dim[state_n_dim] != 1
+  if (last_dim_of_state_is_not_1) {
+    cli::cli_abort(
+      "{.var initial_state} must be either a column vector, or a 3D array \\
+      with final dimension 1"
+    )
   }
 
   # if this is multisite
@@ -110,10 +108,11 @@ iterate_dynamic_function <- function(
   # dots <- lapply(dots, as.greta_array)
   dots <- lapply(list(...), dummy_greta_array)
 
-  if (length(dots) > 1 && is.null(names(dots))) {
-    stop("all arguments passed to the transition function ",
-         "must be explicitly named",
-         call. = FALSE)
+  args_not_named <- length(dots) > 1 && is.null(names(dots))
+  if (args_not_named) {
+    cli::cli_abort(
+      "All arguments passed to transition function must be explicitly named"
+    )
   }
 
   # handle time-varying parameters, sending only a slice to the function when
@@ -123,7 +122,10 @@ iterate_dynamic_function <- function(
   }
 
   # get index to time-varying parameters in a list
-  parameter_is_time_varying_index <- match(parameter_is_time_varying, names(dots))
+  parameter_is_time_varying_index <- match(
+    parameter_is_time_varying,
+    names(dots)
+    )
 
   tf_transition_function <- as_tf_transition_function(
     transition_function = transition_function,

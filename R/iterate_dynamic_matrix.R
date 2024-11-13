@@ -89,17 +89,9 @@ iterate_dynamic_matrix <- function(
   state_dim <- dim(state)
   state_n_dim <- length(state_dim)
 
-  if (!state_n_dim %in% 2:3) {
-    stop ("state must be either two- or three-dimensional",
-          call. = FALSE)
-  }
+  check_state_is_2d_or_3d(state_n_dim)
 
-  # ensure the last dim of state is 1
-  if (state_dim[state_n_dim] != 1) {
-    stop ("initial_state must be either a column vector, ",
-          "or a 3D array with final dimension 1",
-          call. = FALSE)
-  }
+  check_initial_state_col_vec_or_3d_dim_1(state)
 
   # if this is multisite
   state_multisite <- state_n_dim == 3
@@ -107,7 +99,12 @@ iterate_dynamic_matrix <- function(
   # create a tensorflow function from the matrix function
   dots <- list(...)
   dots <- lapply(dots, as.greta_array)
-  tf_matrix_function <- as_tf_matrix_function(matrix_function, state, iter = as_data(1), dots)
+  tf_matrix_function <- as_tf_matrix_function(
+    matrix_function,
+    state,
+    iter = as_data(1),
+    dots
+    )
 
   # op returning a fake greta array which is actually a list containing both
   # values and states

@@ -120,18 +120,12 @@ iterate_matrix <- function(matrix,
   state_n_dim <- length(state_dim)
 
   if (!matrix_n_dim %in% 2:3 | !state_n_dim %in% 2:3) {
-    stop("matrix and state must be either two- or three-dimensional",
-      call. = FALSE
+    cli::cli_abort(
+      "matrix and state must be either two- or three-dimensional"
     )
   }
 
-  # ensure the last dim of state is 1
-  if (state_dim[state_n_dim] != 1) {
-    stop("initial_state must be either a column vector, ",
-      "or a 3D array with final dimension 1",
-      call. = FALSE
-    )
-  }
+  check_initial_state_col_vec_or_3d_dim_1(state)
 
   # if this is multisite
   matrix_multisite <- matrix_n_dim == 3
@@ -169,9 +163,9 @@ iterate_matrix <- function(matrix,
     if (matrix_multisite & state_multisite) {
       n <- matrix_dim[1]
       if (state_dim[1] != n) {
-        stop("if matrix is 3D and initial_state is a matrix",
-          "the batch dimension (n) must match",
-          call. = FALSE
+        cli::cli_abort(
+          "If matrix is 3D and initial_state is a matrix, the batch \\
+          dimension (n) must match"
         )
       }
     }
@@ -190,14 +184,14 @@ iterate_matrix <- function(matrix,
   }
 
   if (!all(matrix_raw_dim == m)) {
-    stop("each matrix must be a two-dimensional square greta array ",
-      call. = FALSE
+    cli::cli_abort(
+      "Each matrix must be a two-dimensional square greta array "
     )
   }
 
   if (state_raw_dim != m) {
-    stop("length of each initial_state must match the dimension of matrix",
-      call. = FALSE
+    cli::cli_abort(
+      "Length of each initial_state must match the dimension of matrix"
     )
   }
 
