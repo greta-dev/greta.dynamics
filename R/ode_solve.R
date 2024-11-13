@@ -190,7 +190,7 @@ tf_ode_solve <- function(y0, times, ..., tf_derivative, method) {
 
   integral <- integrator(
     ode_fn = tf_derivative,
-    initial_time = times[1],
+    initial_time = times[0L],
     initial_state = y0,
     solution_times = times
   )
