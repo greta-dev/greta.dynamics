@@ -94,7 +94,7 @@ y <- ode_solve(
   y0 = y0, 
   times = times, 
   rIng, rGrow, rMort, assEff, K,
-  method = "bdf"
+  method = "dp"
   )
 
 # sampling statement/observation model
@@ -120,9 +120,16 @@ points(y_obs[, 2] ~ times, pch = 2)
 
 ```{r}
 #| label: greta-parameter-inference
-# or we can do inference on the parameters:
+# We can also do inference on the parameters
+# priors for the parameters
+rIng <- uniform(0, 2) # /day, rate of ingestion
+rGrow <- uniform(0, 3) # /day, growth rate of prey
+rMort <- uniform(0, 1) # /day, mortality rate of predator
+assEff <- uniform(0, 1) # -, assimilation efficiency
+K <- uniform(0, 30) # mmol/m3, carrying capacity
+obs_sd <- uniform(0, 1)
 
-# build the model (takes a few seconds to define the tensorflow graph)
+# build the model
 m <- model(rIng, rGrow, rMort, assEff, K, obs_sd)
 
 # compute MAP estimate
