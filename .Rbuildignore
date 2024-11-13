@@ -7,4 +7,3 @@
 ^pkgdown$
 ^cran-comments\.md$
 ^LICENSE\.md$
-^vignettes/ode-solve-example_cache/*$

@@ -10,8 +10,7 @@ vignette: >
 ```{r, include = FALSE}
 knitr::opts_chunk$set(comment = "#>",
                       collapse = TRUE,
-                      eval = greta:::check_tf_version("message"),
-                      cache = TRUE)
+                      eval = greta:::check_tf_version("message"))
 ```
 
 ```{r setup}
@@ -95,7 +94,7 @@ y <- ode_solve(
   y0 = y0, 
   times = times, 
   rIng, rGrow, rMort, assEff, K,
-  method = "dp"
+  method = "bdf"
   )
 
 # sampling statement/observation model
