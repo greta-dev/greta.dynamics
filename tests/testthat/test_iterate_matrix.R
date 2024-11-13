@@ -1,8 +1,6 @@
-context("static matrix iteration")
-
 test_that("single iteration works", {
-  skip_if_not(greta:::check_tf_version())
-  source("helpers.R")
+  skip_if_not(check_tf_version())
+  set.seed(2017 - 05 - 01)
 
   n <- 10
   mat <- randu(n, n)
@@ -55,8 +53,8 @@ test_that("single iteration works", {
 })
 
 test_that("vectorised matrix iteration works", {
-  skip_if_not(greta:::check_tf_version())
-  source("helpers.R")
+  skip_if_not(check_tf_version())
+  set.seed(2017 - 05 - 01)
 
   n <- 10
   n_mat <- 20
@@ -93,8 +91,8 @@ test_that("vectorised matrix iteration works", {
 })
 
 test_that("vectorised initial_state iteration works", {
-  skip_if_not(greta:::check_tf_version())
-  source("helpers.R")
+  skip_if_not(check_tf_version())
+  set.seed(2017 - 05 - 01)
 
   n <- 10
   n_mat <- 20
@@ -138,7 +136,7 @@ test_that("vectorised initial_state iteration works", {
 })
 
 test_that("dynamics module errors informatively", {
-  source("helpers.R")
+  set.seed(2017 - 05 - 01)
 
   n <- 10
   m <- 3
@@ -156,84 +154,84 @@ test_that("dynamics module errors informatively", {
   mismatched_state <- randu(m + 1, 1)
 
   # wrongly shaped matrix
-  expect_error(
+  expect_snapshot(
+    error = TRUE,
     iterate_matrix(
       matrix = bad_mat,
       initial_state = good_state
-    ),
-    "matrix must be a two-dimensional square greta array"
+    )
   )
 
-  expect_error(
+  expect_snapshot(
+    error = TRUE,
     iterate_matrix(
       matrix = bad_matrices1,
       initial_state = good_state
-    ),
-    "^matrix and state must be either two- or three-dimensional"
+    )
   )
 
-  expect_error(
+  expect_snapshot(
+    error = TRUE,
     iterate_matrix(
       matrix = bad_matrices1,
       initial_state = good_states
-    ),
-    "^matrix and state must be either two- or three-dimensional"
+    )
   )
 
-  expect_error(
+  expect_snapshot(
+    error = TRUE,
     iterate_matrix(
       matrix = bad_matrices2,
       initial_state = good_state
-    ),
-    "^each matrix must be a two-dimensional square greta array"
+    )
   )
 
-  expect_error(
+  expect_snapshot(
+    error = TRUE,
     iterate_matrix(
       matrix = bad_matrices2,
       initial_state = good_states
-    ),
-    "^each matrix must be a two-dimensional square greta array"
+    )
   )
 
   # wrongly shaped state
-  expect_error(
+  expect_snapshot(
+    error = TRUE,
     iterate_matrix(
       matrix = good_mat,
       initial_state = bad_state
-    ),
-    "initial_state must be either a column vector, or a 3D array"
+    )
   )
 
-  expect_error(
+  expect_snapshot(
+    error = TRUE,
     iterate_matrix(
       matrix = good_matrices,
       initial_state = bad_state
     ),
-    "initial_state must be either a column vector, or a 3D array"
   )
 
   # mismatched matrix and state
-  expect_error(
+  expect_snapshot(
+    error = TRUE,
     iterate_matrix(
       matrix = good_mat,
       initial_state = mismatched_state
-    ),
-    "length of each initial_state must match the dimension"
+    )
   )
 
-  expect_error(
+  expect_snapshot(
+    error = TRUE,
     iterate_matrix(
       matrix = good_matrices,
       initial_state = mismatched_state
-    ),
-    "length of each initial_state must match the dimension"
+    )
   )
 })
 
 test_that("convergence tolerance works", {
-  skip_if_not(greta:::check_tf_version())
-  source("helpers.R")
+  set.seed(2017 - 05 - 01)
+  skip_if_not(check_tf_version())
 
   n <- 10
   niter <- 100
@@ -250,8 +248,8 @@ test_that("convergence tolerance works", {
 })
 
 test_that("iteration works in mcmc", {
-  skip_if_not(greta:::check_tf_version())
-  source("helpers.R")
+  set.seed(2017 - 05 - 01)
+  skip_if_not(check_tf_version())
 
   n <- 10
   n_site <- 30
@@ -274,7 +272,7 @@ test_that("iteration works in mcmc", {
 })
 
 test_that("iteration doesn't underflow", {
-  skip_if_not(greta:::check_tf_version())
+  skip_if_not(check_tf_version())
 
   mat <- matrix(0, 2, 2)
   mat[1, 2] <- 0.9
@@ -286,7 +284,7 @@ test_that("iteration doesn't underflow", {
 })
 
 test_that("iteration doesn't overflow", {
-  skip_if_not(greta:::check_tf_version())
+  skip_if_not(check_tf_version())
 
   mat <- matrix(1e100, 2, 2)
   mat[1, 2] <- 1e200

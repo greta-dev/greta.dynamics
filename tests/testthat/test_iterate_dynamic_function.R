@@ -1,9 +1,6 @@
-context("dynamic function iteration")
-
 test_that("single iteration works", {
-
-  skip_if_not(greta:::check_tf_version())
-  source ("helpers.R")
+  skip_if_not(check_tf_version())
+  set.seed(2017 - 05 - 01)
 
   n <- 4
   init <- rep(1, n)
@@ -66,9 +63,8 @@ test_that("single iteration works", {
 
 
 test_that("iteration works with time-varying parameters", {
-
-  skip_if_not(greta:::check_tf_version())
-  source ("helpers.R")
+  skip_if_not(check_tf_version())
+  set.seed(2017 - 05 - 01)
 
   n <- 4
   init <- runif(n)

@@ -1,9 +1,6 @@
-context("dynamic matrix iteration")
-
 test_that("single iteration works", {
-
-  skip_if_not(greta:::check_tf_version())
-  source ("helpers.R")
+  skip_if_not(check_tf_version())
+  set.seed(2017 - 05 - 01)
 
   n <- 4
   base <- base_matrix(n)

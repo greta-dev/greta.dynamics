@@ -53,7 +53,10 @@ r_iterate_matrix <- function (matrix,
 }
 
 # R versions of dynamics module methods
-r_iterate_dynamic_matrix <- function (matrix_function, initial_state, niter = 100, tol = 1e-6, ...) {
+r_iterate_dynamic_matrix <- function (matrix_function,
+                                      initial_state,
+                                      niter = 100,
+                                      tol = 1e-6, ...) {
 
   states <- list(initial_state)
 
@@ -97,7 +100,7 @@ r_iterate_dynamic_function <- function(transition_function,
     # slice up time-varying ones
     these_dots <- dots
     for (name in parameter_is_time_varying) {
-      these_dots[[name]] <- greta.dynamics:::slice_first_dim(these_dots[[name]], i)
+      these_dots[[name]] <- slice_first_dim(these_dots[[name]], i)
     }
     states[[i + 1]] <- do.call(transition_function, c(list(states[[i]], i), these_dots))
     growth <- states[[i + 1]] / states[[i]]
