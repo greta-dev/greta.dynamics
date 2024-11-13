@@ -29,19 +29,19 @@ is determined to have converged to the same growth rate in all stages}
 \value{
 a named list with five greta arrays:
 \itemize{
-\item{\code{lambda}} {a scalar or vector giving the ratio of the first stage
-values between the final two iterations.}
-\item{\code{stable_state}} {a vector or matrix (with the same dimensions as
+\item \code{lambda} a scalar or vector giving the ratio of the first stage
+values between the final two iterations.
+\item \code{stable_state} a vector or matrix (with the same dimensions as
 \code{initial_state}) giving the state after the final iteration,
-normalised so that the values for all stages sum to one.}
-\item{\code{all_states}} {an n x m x niter matrix of the state values at
-each iteration. This will be 0 for all entries after \code{iterations}.}
-\item{\code{converged}} {an integer scalar or vector indicating whether
+normalised so that the values for all stages sum to one.
+\item \code{all_states} an n x m x niter matrix of the state values at
+each iteration. This will be 0 for all entries after \code{iterations}.
+\item \code{converged} an integer scalar or vector indicating whether
 the iterations for each matrix have converged to a tolerance less than
-\code{tol} (1 if so, 0 if not) before the algorithm finished.}
-\item{\code{iterations}} {a scalar of the maximum number of iterations
+\code{tol} (1 if so, 0 if not) before the algorithm finished.
+\item \code{iterations} a scalar of the maximum number of iterations
 completed before the algorithm terminated. This should match \code{niter}
-if \code{converged} is \code{FALSE}.}
+if \code{converged} is \code{FALSE}.
 }
 }
 \description{

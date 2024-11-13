@@ -30,19 +30,19 @@
 #'
 #' @return a named list with five greta arrays:
 #' \itemize{
-#'   \item{`lambda`} {a scalar or vector giving the ratio of the first stage
-#'   values between the final two iterations.}
-#'   \item{`stable_state`} {a vector or matrix (with the same dimensions as
+#'   \item `lambda` a scalar or vector giving the ratio of the first stage
+#'   values between the final two iterations.
+#'   \item `stable_state` a vector or matrix (with the same dimensions as
 #'   `initial_state`) giving the state after the final iteration,
-#'   normalised so that the values for all stages sum to one.}
-#'   \item{`all_states`} {an n x m x niter matrix of the state values at
-#'   each iteration. This will be 0 for all entries after `iterations`.}
-#'   \item{`converged`} {an integer scalar or vector indicating whether
+#'   normalised so that the values for all stages sum to one.
+#'   \item `all_states` an n x m x niter matrix of the state values at
+#'   each iteration. This will be 0 for all entries after `iterations`.
+#'   \item `converged` an integer scalar or vector indicating whether
 #'   the iterations for each matrix have converged to a tolerance less than
-#'   `tol` (1 if so, 0 if not) before the algorithm finished.}
-#'   \item{`iterations`} {a scalar of the maximum number of iterations
+#'   `tol` (1 if so, 0 if not) before the algorithm finished.
+#'   \item `iterations` a scalar of the maximum number of iterations
 #'   completed before the algorithm terminated. This should match `niter`
-#'   if `converged` is `FALSE`.}
+#'   if `converged` is `FALSE`.
 #' }
 #'
 #' @note because greta vectorises across both MCMC chains and the calculation of

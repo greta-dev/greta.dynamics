@@ -49,22 +49,22 @@
 #'
 #' @return a named list with four greta arrays:
 #' \itemize{
-#'   \item{\code{stable_state}} {a vector or matrix (with the same dimensions as
-#'   \code{initial_state}) giving the state after the final iteration.}
-#'   \item{\code{all_states}} {an n x m x niter matrix of the state values at
-#'   each iteration. This will be 0 for all entries after \code{iterations}.}
-#'   \item{\code{converged}} {an integer scalar indicating whether \emph{all}
-#'   the matrix iterations converged to a tolerance less than \code{tol} (1 if
-#'   so, 0 if not) before the algorithm finished.}
-#'   \item{\code{iterations}} {a scalar of the maximum number of iterations
-#'   completed before the algorithm terminated. This should match \code{niter}
-#'   if \code{converged} is \code{FALSE}.}
+#'   \item `stable_state` a vector or matrix (with the same dimensions as
+#'   `initial_state`) giving the state after the final iteration.
+#'   \item `all_states` an n x m x niter matrix of the state values at
+#'   each iteration. This will be 0 for all entries after `iterations`.
+#'   \item `converged` an integer scalar indicating whether \emph{all}
+#'   the matrix iterations converged to a tolerance less than `tol` (1 if
+#'   so, 0 if not) before the algorithm finished.
+#'   \item `iterations` a scalar of the maximum number of iterations
+#'   completed before the algorithm terminated. This should match `niter`
+#'   if `converged` is `FALSE`
 #' }
 #'
 #' @note because greta vectorises across both MCMC chains and the calculation of
 #'   greta array values, the algorithm is run until all chains (or posterior
 #'   samples), sites and stages have converged to stable growth. So a single
-#'   value of both \code{converged} and \code{iterations} is returned, and the
+#'   value of both `converged` and `iterations` is returned, and the
 #'   value of this will always have the same value in an `mcmc.list` object. So
 #'   inspecting the MCMC trace of these parameters will only tell you whether
 #'   the iteration converged in \emph{all} posterior samples, and the maximum
