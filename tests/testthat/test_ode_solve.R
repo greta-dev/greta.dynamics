@@ -1,8 +1,6 @@
-context("ODE solver")
-
 test_that("ode_solve works like deSolve::ode", {
-  skip_if_not(greta:::check_tf_version())
-  source("helpers.R")
+  set.seed(2017 - 05 - 01)
+  skip_if_not(check_tf_version())
 
   # deSolve version of the Lotka Volterra model
   LVmod <- function(Time, State, Pars) {
@@ -77,8 +75,8 @@ test_that("ode_solve works like deSolve::ode", {
 })
 
 test_that("inference works with ode_solve", {
-  skip_if_not(greta:::check_tf_version())
-  source("helpers.R")
+  skip_if_not(check_tf_version())
+  set.seed(2017 - 05 - 01)
 
   lotka_volterra <- function(y, t, rIng, rGrow, rMort, assEff, K) {
     Prey <- y[1, 1]
@@ -111,7 +109,7 @@ test_that("inference works with ode_solve", {
     rMort = rMort,
     assEff = assEff,
     K = K,
-    method = "rk4"
+    method = "dp"
   )
 
   # simulate some data and fit to it

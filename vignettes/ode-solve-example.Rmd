@@ -1,14 +1,15 @@
 ---
-title: "ode-solve-example"
+title: "ODE solve example"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{ode-solve-example}
+  %\VignetteIndexEntry{ODE solve example}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
 ```{r, include = FALSE}
-knitr::opts_chunk$set(comment = NA,
+knitr::opts_chunk$set(comment = "#>",
+                      collapse = TRUE,
                       eval = greta:::check_tf_version("message"),
                       cache = TRUE)
 ```
@@ -93,7 +94,8 @@ y <- ode_solve(
   derivative = lotka_volterra, 
   y0 = y0, 
   times = times, 
-  rIng, rGrow, rMort, assEff, K
+  rIng, rGrow, rMort, assEff, K,
+  method = "dp"
   )
 
 # sampling statement/observation model
@@ -110,7 +112,7 @@ values <- c(
   as.list(pars)
 )
 vals <- calculate(y, values = values)[[1]]
-plot(vals[, 1] ~ times, type = "l", ylim = range(vals))
+plot(vals[, 1] ~ times, type = "l", ylim = range(vals, na.rm = TRUE))
 lines(vals[, 2] ~ times, lty = 2)
 points(y_obs[, 1] ~ times)
 points(y_obs[, 2] ~ times, pch = 2)
@@ -125,7 +127,16 @@ points(y_obs[, 2] ~ times, pch = 2)
 m <- model(rIng, rGrow, rMort, assEff, K, obs_sd)
 
 # compute MAP estimate
-o <- opt(m)
+o <- opt(
+  model = m,
+  initial_values = initials(
+    rIng = 0.2,
+    rGrow = 1.0,
+    rMort = 0.2,
+    assEff = 0.5,
+    K = 10.0
+  )
+  )
 o
 ```
 
