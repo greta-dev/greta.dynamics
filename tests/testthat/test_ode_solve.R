@@ -45,33 +45,44 @@ test_that("ode_solve works like deSolve::ode", {
   # loop through the solvers (ode45 should be similar to the dopri5 method in TF)
   methods <- c("bdf", "dp")
 
-  for (method in methods) {
-    deSolve_method <- method
+  desolve_ode_fun <- function(method){
+    out <- deSolve::ode(yini, times, LVmod, pars, method = method)
+    out
+  }
 
-    if (deSolve_method == "midpoint") {
-      deSolve_method <- rk_midpoint
-    }
-
-    r_out <- deSolve::ode(yini, times, LVmod, pars,
-      method = deSolve_method
-    )
-
+  greta_ode_fun <- function(method){
     y <- ode_solve(lotka_volterra,
-      y0 = t(yini),
-      times,
-      rIng = pars["rIng"],
-      rGrow = pars["rGrow"],
-      rMort = pars["rMort"],
-      assEff = pars["assEff"],
-      K = pars["K"],
-      method = method
+                   y0 = t(yini),
+                   times,
+                   rIng = pars["rIng"],
+                   rGrow = pars["rGrow"],
+                   rMort = pars["rMort"],
+                   assEff = pars["assEff"],
+                   K = pars["K"],
+                   method = method
     )
     g_out <- cbind(times, y)
 
     greta_out <- calculate(g_out)[[1]]
-    difference <- abs(greta_out - r_out)
-    expect_true(all(difference < 1e-4))
+
+    greta_out
   }
+
+  desolve_bdf <- desolve_ode_fun("bdf")
+  greta_bdf <- greta_ode_fun("bdf")
+  # desolve equivalent to dp is ode45
+  desolve_dp <- desolve_ode_fun("ode45")
+  greta_dp <- greta_ode_fun("dp")
+
+  difference_bdf <- abs(greta_bdf - desolve_bdf)
+  difference_dp <- abs(greta_dp - desolve_dp)
+  # TODO
+  # These values start out a little bit different, I'm wondering if
+  # we should discard the first 10 time stamps or so? Or reduce our
+  # expectation doen to <
+  expect_true(all(difference_bdf < 1e-4))
+  expect_true(all(difference_dp < 1e-4))
+
 })
 
 test_that("inference works with ode_solve", {
