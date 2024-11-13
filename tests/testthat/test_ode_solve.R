@@ -45,7 +45,7 @@ test_that("ode_solve works like deSolve::ode", {
   times <- seq(0, 200, by = 1)
 
   # loop through the solvers (ode45 should be similar to the dopri5 method in TF)
-  methods <- c("ode45", "rk4", "midpoint")
+  methods <- c("bdf", "dp")
 
   for (method in methods) {
     deSolve_method <- method

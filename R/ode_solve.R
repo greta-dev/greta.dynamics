@@ -199,6 +199,9 @@ tf_ode_solve <- function(y0, times, ..., tf_derivative, method) {
 
   # dag$on_graph(integral <- integrator(tf_derivative, y0, times))
 
+  # pull out only the states
+  integral <- integral$states
+
   # reshape to put batch dimension first
   permutation <- seq_along(dim(integral)) - 1L
   permutation[1:2] <- permutation[2:1]
@@ -233,7 +236,7 @@ as_tf_derivative <- function(derivative, y, t, dots) {
     t <- tf$reshape(t, shape = shape(1, 1, 1))
 
     # tf_dots will have been added to this environment by tf_ode_solve
-    args <- list(t = t, y = y)
+    args <- list(y = y, t = t)
     do.call(tf_fun, c(args, tf_dots))
   }
 }
