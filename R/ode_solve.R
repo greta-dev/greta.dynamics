@@ -13,9 +13,11 @@
 #' @param times a column vector of times at which to evaluate y
 #' @param ... named arguments giving greta arrays for the additional (fixed)
 #'   parameters
-#' @param method which solver to use. `"ode45"` uses adaptive step
-#'   sizes, whilst `"rk4"` and `"midpoint"` use the fixed grid defined
-#'   by `times`; they may be faster but less accurate than `"ode45"`.
+#' @param method which solver to use. Default is "dp", which is similar to
+#'   deSolve's "ode45". Currently implemented is "dp", and "bdf".The "dp" solver
+#'   is Dormand-Prince explicit solver for non-stiff ODEs. The "bdf" solver is
+#'   Backward Differentiation Formula (BDF) solver for stiff ODEs. Currently no
+#'   arguments for "bdf" or "dp" are able to be specified.
 #'
 #' @return greta array
 #'
@@ -111,7 +113,7 @@
 #' o
 #' }
 ode_solve <- function(derivative, y0, times, ...,
-                      method = c("ode45", "rk4", "midpoint")) {
+                      method = c("dp", "bdf")) {
   y0 <- as.greta_array(y0)
   times <- as.greta_array(times)
   method <- match.arg(method)
@@ -119,9 +121,7 @@ ode_solve <- function(derivative, y0, times, ...,
   # check times is a column vector
   t_dim <- dim(times)
   if (length(t_dim != 2) && t_dim[2] != 1) {
-    stop("",
-      call. = FALSE
-    )
+    cli::cli_abort("times must be a column vector")
   }
 
   dots <- list(...)
@@ -133,7 +133,12 @@ ode_solve <- function(derivative, y0, times, ...,
   # check the arguments of derivative are valid and match dots
 
   # create a tensorflow version of the function
-  tf_derivative <- as_tf_derivative(derivative, y0, times[1], dots)
+  tf_derivative <- as_tf_derivative(
+    derivative = derivative,
+    y = y0,
+    t = times[1],
+    dots = dots
+    )
 
   # the dimensions should be the dimensions of the y0, duplicated along times
   n_time <- dim(times)[1]
@@ -176,19 +181,24 @@ tf_ode_solve <- function(y0, times, ..., tf_derivative, method) {
   # tf_derivative creates tensors correctly
   dag <- parent.frame()$dag
 
-  tf_int <- tf$contrib$integrate
+  tf_int <- tfp$math$ode
 
   integrator <- switch(method,
-    ode45 = tf_int$odeint,
-    rk4 = function(...) {
-      tf_int$odeint_fixed(..., method = "rk4")
-    },
-    midpoint = function(...) {
-      tf_int$odeint_fixed(..., method = "midpoint")
-    }
+    dp = function(...) tf_int$DormandPrince()$solve(...),
+    bdf = function(...) tf_int$BDF()$solve(...)
   )
 
-  dag$on_graph(integral <- integrator(tf_derivative, y0, times))
+  integral <- integrator(
+    ode_fn = tf_derivative,
+    initial_time = times[0L],
+    initial_state = y0,
+    solution_times = times
+  )
+
+  # dag$on_graph(integral <- integrator(tf_derivative, y0, times))
+
+  # pull out only the states
+  integral <- integral$states
 
   # reshape to put batch dimension first
   permutation <- seq_along(dim(integral)) - 1L
@@ -216,7 +226,7 @@ as_tf_derivative <- function(derivative, y, t, dots) {
   tf_dots <- NULL
 
   # return a function acting only on tensors y and t, to feed to the ode solver
-  function(y, t) {
+  function(t, y) {
 
     # t will be dimensionless when used in the ode solver, need to expand out t
     # to have same dim as a scalar constant so that it can be used in the same

@@ -1,16 +1,16 @@
 ---
-title: "ode-solve-example"
+title: "ODE solve example"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{ode-solve-example}
+  %\VignetteIndexEntry{ODE solve example}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
 ```{r, include = FALSE}
-knitr::opts_chunk$set(comment = NA,
-                      eval = greta:::check_tf_version("message"),
-                      cache = TRUE)
+knitr::opts_chunk$set(comment = "#>",
+                      collapse = TRUE,
+                      eval = greta:::check_tf_version("message"))
 ```
 
 ```{r setup}
@@ -47,7 +47,10 @@ pars <- c(
 
 yini <- c(Prey = 1, Predator = 2)
 times <- seq(0, 30, by = 1)
-out <- ode(yini, times, LVmod, pars)
+out <- ode(y = yini, 
+           times = times, 
+           func = LVmod, 
+           parms = pars)
 
 # simulate observations
 jitter <- rnorm(2 * length(times), 0, 0.1)
@@ -86,7 +89,13 @@ y0 <- uniform(0, 5, dim = c(1, 2))
 obs_sd <- uniform(0, 1)
 
 # solution to the ODE
-y <- ode_solve(lotka_volterra, y0, times, rIng, rGrow, rMort, assEff, K)
+y <- ode_solve(
+  derivative = lotka_volterra, 
+  y0 = y0, 
+  times = times, 
+  rIng, rGrow, rMort, assEff, K,
+  method = "dp"
+  )
 
 # sampling statement/observation model
 distribution(y_obs) <- normal(y, obs_sd)
@@ -102,7 +111,7 @@ values <- c(
   as.list(pars)
 )
 vals <- calculate(y, values = values)[[1]]
-plot(vals[, 1] ~ times, type = "l", ylim = range(vals))
+plot(vals[, 1] ~ times, type = "l", ylim = range(vals, na.rm = TRUE))
 lines(vals[, 2] ~ times, lty = 2)
 points(y_obs[, 1] ~ times)
 points(y_obs[, 2] ~ times, pch = 2)
@@ -111,13 +120,29 @@ points(y_obs[, 2] ~ times, pch = 2)
 
 ```{r}
 #| label: greta-parameter-inference
-# or we can do inference on the parameters:
+# We can also do inference on the parameters
+# priors for the parameters
+rIng <- uniform(0, 2) # /day, rate of ingestion
+rGrow <- uniform(0, 3) # /day, growth rate of prey
+rMort <- uniform(0, 1) # /day, mortality rate of predator
+assEff <- uniform(0, 1) # -, assimilation efficiency
+K <- uniform(0, 30) # mmol/m3, carrying capacity
+obs_sd <- uniform(0, 1)
 
-# build the model (takes a few seconds to define the tensorflow graph)
+# build the model
 m <- model(rIng, rGrow, rMort, assEff, K, obs_sd)
 
 # compute MAP estimate
-o <- opt(m)
+o <- opt(
+  model = m,
+  initial_values = initials(
+    rIng = 0.2,
+    rGrow = 1.0,
+    rMort = 0.2,
+    assEff = 0.5,
+    K = 10.0
+  )
+  )
 o
 ```
 

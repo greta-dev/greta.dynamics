@@ -11,6 +11,7 @@
 #'
 "_PACKAGE"
 
+
 # crate the node list object whenever the package is loaded
 .onLoad <- function(libname, pkgname) {
 
@@ -23,3 +24,14 @@
     "max_num_steps exceeded"
   )
 }
+
+
+## usethis namespace: start
+## usethis namespace: end
+NULL
+
+globalVariables(
+  c(
+    "as_data"
+  )
+)

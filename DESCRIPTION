@@ -1,7 +1,7 @@
 Package: greta.dynamics
 Type: Package
 Title: Modelling Structured Dynamical Systems in 'greta'
-Version: 0.2.1
+Version: 0.2.2.9000
 Authors@R: c(
     person(
       given = "Nick", 
@@ -28,12 +28,13 @@ URL: https://github.com/greta-dev/greta.dynamics,
     https://greta-dev.github.io/greta.dynamics/
 BugReports: https://github.com/greta-dev/greta.dynamics/issues
 Imports: 
-    cli,
+    cli (>= 3.6.3),
     glue,
+    rlang (>= 1.1.4),
     tensorflow (>= 1.14.0)
 Depends: 
-  greta (>= 0.4.2),
-  R (>= 3.1.0)
+  greta (>= 0.5.0),
+  R (>= 4.1.0)
 Suggests: 
     covr,
     knitr,
@@ -48,8 +49,8 @@ Config/testthat/edition: 3
 Encoding: UTF-8
 Language: en-GB
 LazyData: true
-RoxygenNote: 7.3.1
-SystemRequirements: Python (>= 2.7.0) with header files and shared
-    library; TensorFlow (v1.14; https://www.tensorflow.org/); TensorFlow
-    Probability (v0.7.0; https://www.tensorflow.org/probability/)
 Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.2
+SystemRequirements: Python (>= 3.7.0) with header files and shared
+    library; TensorFlow (>= v2.0.0; https://www.tensorflow.org/); TensorFlow
+    Probability (v0.8.0; https://www.tensorflow.org/probability/)

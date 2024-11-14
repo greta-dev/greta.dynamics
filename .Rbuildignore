@@ -7,3 +7,5 @@
 ^pkgdown$
 ^cran-comments\.md$
 ^LICENSE\.md$
+^__pycache__$
+^CRAN-SUBMISSION$
