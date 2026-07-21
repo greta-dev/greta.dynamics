@@ -50,7 +50,7 @@ minimum (maximum) will be set to the minimum (maximum).}
 \value{
 a named list with four greta arrays:
 \itemize{
-\item \code{stable_state} a vector or matrix (with the same dimensions as
+\item \code{stable_population} a vector or matrix (with the same dimensions as
 \code{initial_state}) giving the state after the final iteration.
 \item \code{all_states} an n x m x niter matrix of the state values at
 each iteration. This will be 0 for all entries after \code{iterations}.
@@ -90,4 +90,25 @@ value of this will always have the same value in an \code{mcmc.list} object. So
 inspecting the MCMC trace of these parameters will only tell you whether
 the iteration converged in \emph{all} posterior samples, and the maximum
 number of iterations required to do so across all these samples
+}
+\examples{
+\dontrun{
+# density-dependent (logistic) growth towards a carrying capacity of 100,
+# for two independent populations
+transition_function <- function(state, iter) {
+  state + 0.2 * state * (1 - state / 100)
+}
+
+initial_state <- as_data(matrix(c(2, 30), nrow = 2, ncol = 1))
+
+results <- iterate_dynamic_function(
+  transition_function = transition_function,
+  initial_state = initial_state,
+  niter = 100,
+  tol = 1e-6
+)
+
+# both populations converge on the carrying capacity
+calculate(results$stable_population, results$converged, results$iterations)
+}
 }

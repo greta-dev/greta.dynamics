@@ -1,4 +1,58 @@
 url: https://greta-dev.github.io/greta.dynamics/
+
+development:
+  mode: auto
+
 template:
+  package: greta.pkgdown
   bootstrap: 5
 
+home:
+  # The shared greta SCSS hides the home-page sidebar, so turn it off here too
+  # rather than have pkgdown render a sidebar that CSS then hides.
+  sidebar: false
+  title: greta.dynamics — modelling structured dynamical systems in greta
+  description: >
+    greta.dynamics extends greta with tools for analysing transition matrices
+    by iteration and for solving ordinary differential equations, so dynamical
+    systems can be embedded directly in a greta model.
+
+navbar:
+  structure:
+    left: [reference, articles, news]
+  components:
+    reference:
+      text: docs
+      href: reference/index.html
+    articles:
+      text: examples
+      menu:
+        - text: iterating transition matrices
+          href: articles/iterate-matrix-example.html
+        - text: solving ODEs
+          href: articles/ode-solve-example.html
+
+reference:
+  - title: Iterating transition matrices
+    desc: >
+      Iterate transition matrices to convergence to obtain stable states,
+      growth rates, and related quantities.
+    contents:
+      - iterate_matrix
+      - iterate_dynamic_matrix
+      - iterate_dynamic_function
+
+  - title: Solving differential equations
+    desc: Solve systems of ordinary differential equations within a greta model
+    contents:
+      - ode_solve
+
+  - title: Package overview
+    contents:
+      - greta.dynamics-package
+
+articles:
+  - title: Examples
+    contents:
+      - iterate-matrix-example
+      - ode-solve-example
