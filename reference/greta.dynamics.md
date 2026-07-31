@@ -1,8 +1,8 @@
 # greta.dynamics: a greta extension for modelling dynamical systems
 
-an extension to [greta](https://greta-stats.org/) with functions for
-simulating dynamical systems, defined by of ordinary differential
-equations (see
+an extension to [greta](https://greta-dev.github.io/greta/) with
+functions for simulating dynamical systems, defined by of ordinary
+differential equations (see
 [`ode_solve()`](https://greta-dev.github.io/greta.dynamics/reference/ode_solve.md))
 or transition matrices
 ([`iterate_matrix()`](https://greta-dev.github.io/greta.dynamics/reference/iterate_matrix.md)).
@@ -23,6 +23,9 @@ Useful links:
 ([ORCID](https://orcid.org/0000-0003-1460-8722))
 
 Authors:
+
+- Nicholas Tierney <nicholas.tierney@gmail.com>
+  ([ORCID](https://orcid.org/0000-0003-1460-8722))
 
 - Nick Golding <nick.golding.research@gmail.com>
   ([ORCID](https://orcid.org/0000-0001-8916-5570)) \[copyright holder\]

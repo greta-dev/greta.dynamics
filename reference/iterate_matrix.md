@@ -46,7 +46,7 @@ a named list with five greta arrays:
 - `lambda` a scalar or vector giving the ratio of the first stage values
   between the final two iterations.
 
-- `stable_state` a vector or matrix (with the same dimensions as
+- `stable_distribution` a vector or matrix (with the same dimensions as
   `initial_state`) giving the state after the final iteration,
   normalised so that the values for all stages sum to one.
 

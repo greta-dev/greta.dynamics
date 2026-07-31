@@ -1,6 +1,6 @@
 # Articles
 
-### All vignettes
+### Examples
 
 - [iterate-matrix-example](https://greta-dev.github.io/greta.dynamics/articles/iterate-matrix-example.md):
 - [ODE solve

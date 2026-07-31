@@ -71,7 +71,7 @@ iterate_dynamic_function(
 
 a named list with four greta arrays:
 
-- `stable_state` a vector or matrix (with the same dimensions as
+- `stable_population` a vector or matrix (with the same dimensions as
   `initial_state`) giving the state after the final iteration.
 
 - `all_states` an n x m x niter matrix of the state values at each
@@ -109,3 +109,27 @@ this will always have the same value in an `mcmc.list` object. So
 inspecting the MCMC trace of these parameters will only tell you whether
 the iteration converged in *all* posterior samples, and the maximum
 number of iterations required to do so across all these samples
+
+## Examples
+
+``` r
+if (FALSE) { # \dontrun{
+# density-dependent (logistic) growth towards a carrying capacity of 100,
+# for two independent populations
+transition_function <- function(state, iter) {
+  state + 0.2 * state * (1 - state / 100)
+}
+
+initial_state <- as_data(matrix(c(2, 30), nrow = 2, ncol = 1))
+
+results <- iterate_dynamic_function(
+  transition_function = transition_function,
+  initial_state = initial_state,
+  niter = 100,
+  tol = 1e-6
+)
+
+# both populations converge on the carrying capacity
+calculate(results$stable_population, results$converged, results$iterations)
+} # }
+```

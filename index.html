@@ -5,24 +5,37 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Modelling Structured Dynamical Systems in greta • greta.dynamics</title>
+<title>greta.dynamics — modelling structured dynamical systems in greta • greta.dynamics</title>
+<!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="favicon-96x96.png">
+<link rel="icon" type="”image/svg+xml”" href="favicon.svg">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="icon" sizes="any" href="favicon.ico">
+<link rel="manifest" href="site.webmanifest">
 <script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
-<script src="deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<script src="deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="deps/Roboto-0.4.10/font.css" rel="stylesheet">
+<link href="deps/Roboto_Mono-0.4.10/font.css" rel="stylesheet">
+<link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Modelling Structured Dynamical Systems in greta">
-<meta name="description" content="A greta extension for analysing transition matrices and ordinary differential equations representing dynamical systems. Provides functions for analysing transition matrices by iteration, and solving ordinary differential equations. This is an extension to the greta software, Golding (2019) &lt;doi:10.21105/joss.01601&gt;.">
-<meta property="og:description" content="A greta extension for analysing transition matrices and ordinary differential equations representing dynamical systems. Provides functions for analysing transition matrices by iteration, and solving ordinary differential equations. This is an extension to the greta software, Golding (2019) &lt;doi:10.21105/joss.01601&gt;.">
+<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="greta.dynamics — modelling structured dynamical systems in greta">
+<meta name="description" content="greta.dynamics extends greta with tools for analysing transition matrices by iteration and for solving ordinary differential equations, so dynamical systems can be embedded directly in a greta model.
+">
+<meta property="og:description" content="greta.dynamics extends greta with tools for analysing transition matrices by iteration and for solving ordinary differential equations, so dynamical systems can be embedded directly in a greta model.
+">
+<meta property="og:image" content="https://greta-dev.github.io/greta.dynamics/reference/figures/name_icon_on_purple.png">
+<meta property="og:image:alt" content="greta">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
-    <nav class="navbar navbar-expand-lg fixed-top bg-light" data-bs-theme="light" aria-label="Site navigation"><div class="container">
 
-    <a class="navbar-brand me-2" href="index.html">greta.dynamics</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.2.9000</small>
+<nav class="navbar navbar-expand-lg fixed-top bg-light" data-bs-theme="light" aria-label="Site navigation"><div class="container">
+
+    <a class="navbar-brand me-2" href="index.html"><img src="name_icon_on_white.png" class="navbar-logo" alt="greta"></a>
+
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.2.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -31,12 +44,12 @@
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
-<li class="nav-item"><a class="nav-link" href="reference/index.html">Reference</a></li>
+<li class="nav-item"><a class="nav-link" href="reference/index.html">docs</a></li>
 <li class="nav-item dropdown">
-  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="articles/iterate-matrix-example.html">iterate-matrix-example</a></li>
-    <li><a class="dropdown-item" href="articles/ode-solve-example.html">ODE solve example</a></li>
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-examples" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">examples</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-examples">
+<li><a class="dropdown-item" href="articles/iterate-matrix-example.html">iterating transition matrices</a></li>
+    <li><a class="dropdown-item" href="articles/ode-solve-example.html">solving ODEs</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
@@ -45,6 +58,7 @@
 <li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="search.json">
 </form></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://forum.greta-stats.org" aria-label="greta forum"><span class="fa fa-comments"></span></a></li>
 <li class="nav-item"><a class="external-link nav-link" href="https://github.com/greta-dev/greta.dynamics/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
       </ul>
 </div>
@@ -57,7 +71,7 @@
 <div class="page-header"><h1 id="gretadynamics-dynamical-models-in-greta">greta.dynamics: Dynamical models in greta<a class="anchor" aria-label="anchor" href="#gretadynamics-dynamical-models-in-greta"></a>
 </h1></div>
 <!-- badges: start -->
-
+<p><a href="https://github.com/greta-dev/greta.dynamics/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/greta-dev/greta.dynamics/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a> <a href="https://CRAN.R-project.org/package=greta.dynamics" class="external-link"><img src="https://www.r-pkg.org/badges/version/greta.dynamics" alt="CRAN status"></a> <a href="https://app.codecov.io/github/greta-dev/greta.dynamics?branch=master" class="external-link"><img src="https://codecov.io/github/greta-dev/greta.dynamics/coverage.svg?branch=master" alt="codecov.io"></a> <!-- badges: end --></p>
 <p><code>greta.dynamics</code> provides functions for modelling dynamical systems in greta. It currently provides functions for analysing transition matrices by iteration, and solving ordinary differential equations.</p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
@@ -73,49 +87,7 @@
 <code class="sourceCode R"><span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"greta-dev/greta.dynamics"</span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
-  </main><aside class="col-md-3"><div class="links">
-<h2 data-toc-skip>Links</h2>
-<ul class="list-unstyled">
-<li><a href="https://cloud.r-project.org/package=greta.dynamics" class="external-link">View on CRAN</a></li>
-<li><a href="https://github.com/greta-dev/greta.dynamics/" class="external-link">Browse source code</a></li>
-<li><a href="https://github.com/greta-dev/greta.dynamics/issues" class="external-link">Report a bug</a></li>
-</ul>
-</div>
-
-<div class="license">
-<h2 data-toc-skip>License</h2>
-<ul class="list-unstyled">
-<li><a href="LICENSE.html">Full license</a></li>
-<li><small>Apache License (&gt;= 2)</small></li>
-</ul>
-</div>
-
-
-<div class="citation">
-<h2 data-toc-skip>Citation</h2>
-<ul class="list-unstyled">
-<li><a href="authors.html#citation">Citing greta.dynamics</a></li>
-</ul>
-</div>
-
-<div class="developers">
-<h2 data-toc-skip>Developers</h2>
-<ul class="list-unstyled">
-<li>Nick Golding <br><small class="roles"> Author, copyright holder </small> <a href="https://orcid.org/https://orcid.org/0000-0001-8916-5570" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a>  </li>
-<li>Nicholas Tierney <br><small class="roles"> Author, maintainer </small> <a href="https://orcid.org/https://orcid.org/0000-0003-1460-8722" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a>  </li>
-</ul>
-</div>
-
-<div class="dev-status">
-<h2 data-toc-skip>Dev status</h2>
-<ul class="list-unstyled">
-<li><a href="https://github.com/greta-dev/greta.dynamics/actions" class="external-link"><img src="https://github.com/greta-dev/greta.dynamics/workflows/R-CMD-check/badge.svg" alt="R-CMD-check"></a></li>
-<li><a href="https://CRAN.R-project.org/package=greta.dynamics" class="external-link"><img src="https://www.r-pkg.org/badges/version/greta.dynamics" alt="CRAN status"></a></li>
-<li><a href="https://app.codecov.io/github/greta-dev/greta.dynamics?branch=master" class="external-link"><img src="https://codecov.io/github/greta-dev/greta.dynamics/coverage.svg?branch=master" alt="codecov.io"></a></li>
-</ul>
-</div>
-
-  </aside>
+  </main><aside class="col-md-3"></aside>
 </div>
 
 

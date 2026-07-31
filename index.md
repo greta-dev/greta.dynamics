@@ -1,5 +1,10 @@
 # greta.dynamics: Dynamical models in greta
 
+[![R-CMD-check](https://github.com/greta-dev/greta.dynamics/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/greta-dev/greta.dynamics/actions/workflows/R-CMD-check.yaml)
+[![CRAN
+status](https://www.r-pkg.org/badges/version/greta.dynamics)](https://CRAN.R-project.org/package=greta.dynamics)
+[![codecov.io](https://codecov.io/github/greta-dev/greta.dynamics/coverage.svg?branch=master)](https://app.codecov.io/github/greta-dev/greta.dynamics?branch=master)
+
 `greta.dynamics` provides functions for modelling dynamical systems in
 greta. It currently provides functions for analysing transition matrices
 by iteration, and solving ordinary differential equations.

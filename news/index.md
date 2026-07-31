@@ -1,6 +1,39 @@
 # Changelog
 
-## greta.dynamics (development version)
+## greta.dynamics 0.2.3
+
+CRAN release: 2026-07-22
+
+This release restores `greta.dynamics` to CRAN. It was archived in
+September 2025 as a consequence of its dependency, `greta`, being
+archived. `greta` 0.6.0 returned to CRAN in July 2026, which unblocks
+this resubmission.
+
+### Documentation fixes
+
+- The `@return` documentation for
+  [`iterate_matrix()`](https://greta-dev.github.io/greta.dynamics/reference/iterate_matrix.md),
+  [`iterate_dynamic_matrix()`](https://greta-dev.github.io/greta.dynamics/reference/iterate_dynamic_matrix.md)
+  and
+  [`iterate_dynamic_function()`](https://greta-dev.github.io/greta.dynamics/reference/iterate_dynamic_function.md)
+  named a list element `stable_state`, which none of these functions
+  actually return. The documentation now uses the real names:
+  `stable_distribution` for
+  [`iterate_matrix()`](https://greta-dev.github.io/greta.dynamics/reference/iterate_matrix.md),
+  and `stable_population` for
+  [`iterate_dynamic_matrix()`](https://greta-dev.github.io/greta.dynamics/reference/iterate_dynamic_matrix.md)
+  and
+  [`iterate_dynamic_function()`](https://greta-dev.github.io/greta.dynamics/reference/iterate_dynamic_function.md).
+- Added worked examples to
+  [`iterate_dynamic_matrix()`](https://greta-dev.github.io/greta.dynamics/reference/iterate_dynamic_matrix.md)
+  and
+  [`iterate_dynamic_function()`](https://greta-dev.github.io/greta.dynamics/reference/iterate_dynamic_function.md),
+  which previously had none.
+
+### Internal changes
+
+- Now requires `greta` \>= 0.6.0.
+- Removed `LazyData` from `DESCRIPTION`, as the package ships no data.
 
 ## greta.dynamics 0.2.2
 

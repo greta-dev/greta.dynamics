@@ -62,7 +62,7 @@ iterate_dynamic_matrix(
 
 a named list with four greta arrays:
 
-- `stable_state` a vector or matrix (with the same dimensions as
+- `stable_population` a vector or matrix (with the same dimensions as
   `initial_state`) giving the state after the final iteration.
 
 - `all_states` an n x m x niter matrix of the state values at each
@@ -106,3 +106,35 @@ this will always have the same value in an `mcmc.list` object. So
 inspecting the MCMC trace of these parameters will only tell you whether
 the iteration converged in *all* posterior samples, and the maximum
 number of iterations required to do so across all these samples
+
+## Examples
+
+``` r
+if (FALSE) { # \dontrun{
+# a transition matrix that is constant across iterations. Its columns sum to
+# one, so the total population size is conserved and the two stages converge
+# on a stable ratio of 2:1
+matrix_function <- function(state, iter) {
+  mat <- zeros(2, 2)
+  mat[1, 1] <- 0.9
+  mat[1, 2] <- 0.2
+  mat[2, 1] <- 0.1
+  mat[2, 2] <- 0.8
+  mat
+}
+
+# start away from the stable state, so the iteration has work to do
+initial_state <- as_data(matrix(c(2, 20), nrow = 2, ncol = 1))
+
+results <- iterate_dynamic_matrix(
+  matrix_function = matrix_function,
+  initial_state = initial_state,
+  niter = 100,
+  tol = 1e-6
+)
+
+# the population size after the final iteration, and whether the iteration
+# converged before hitting `niter`
+calculate(results$stable_population, results$converged, results$iterations)
+} # }
+```

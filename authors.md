@@ -14,13 +14,13 @@ Source:
 [`DESCRIPTION`](https://github.com/greta-dev/greta.dynamics/blob/main/DESCRIPTION)
 
 Golding N, Tierney N (2026). *greta.dynamics: Modelling Structured
-Dynamical Systems in 'greta'*. R package version 0.2.2.9000,
+Dynamical Systems in 'greta'*. R package version 0.2.3,
 <https://github.com/greta-dev/greta.dynamics>.
 
     @Manual{,
       title = {greta.dynamics: Modelling Structured Dynamical Systems in 'greta'},
       author = {Nick Golding and Nicholas Tierney},
       year = {2026},
-      note = {R package version 0.2.2.9000},
+      note = {R package version 0.2.3},
       url = {https://github.com/greta-dev/greta.dynamics},
     }
