@@ -1,11 +1,10 @@
-pandoc: 2.7.3
-pkgdown: 2.0.6
+pandoc: 3.8.3
+pkgdown: 2.2.1
 pkgdown_sha: ~
 articles:
   iterate-matrix-example: iterate-matrix-example.html
   ode-solve-example: ode-solve-example.html
-last_built: 2022-09-06T02:09Z
+last_built: 2026-07-31T00:30Z
 urls:
   reference: https://greta-dev.github.io/greta.dynamics/reference
   article: https://greta-dev.github.io/greta.dynamics/articles
-
