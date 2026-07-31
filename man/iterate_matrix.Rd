@@ -31,8 +31,8 @@ a named list with five greta arrays:
 \itemize{
 \item \code{lambda} a scalar or vector giving the ratio of the first stage
 values between the final two iterations.
-\item \code{stable_state} a vector or matrix (with the same dimensions as
-\code{initial_state}) giving the state after the final iteration,
+\item \code{stable_distribution} a vector or matrix (with the same dimensions
+as \code{initial_state}) giving the state after the final iteration,
 normalised so that the values for all stages sum to one.
 \item \code{all_states} an n x m x niter matrix of the state values at
 each iteration. This will be 0 for all entries after \code{iterations}.

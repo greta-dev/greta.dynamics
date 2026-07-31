@@ -6,7 +6,7 @@
 \alias{greta.dynamics}
 \title{greta.dynamics: a greta extension for modelling dynamical systems}
 \description{
-an extension to \href{https://greta-stats.org/}{greta}
+an extension to \href{https://greta-dev.github.io/greta/}{greta}
 with functions for simulating dynamical systems, defined by of ordinary
 differential equations (see \code{\link[=ode_solve]{ode_solve()}}) or transition matrices
 (\code{\link[=iterate_matrix]{iterate_matrix()}}).
@@ -25,6 +25,7 @@ Useful links:
 
 Authors:
 \itemize{
+  \item Nicholas Tierney \email{nicholas.tierney@gmail.com} (\href{https://orcid.org/0000-0003-1460-8722}{ORCID})
   \item Nick Golding \email{nick.golding.research@gmail.com} (\href{https://orcid.org/0000-0001-8916-5570}{ORCID}) [copyright holder]
 }
 

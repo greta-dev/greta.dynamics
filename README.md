@@ -1,7 +1,7 @@
 # greta.dynamics: Dynamical models in greta
 
 <!-- badges: start -->
-  [![R-CMD-check](https://github.com/greta-dev/greta.dynamics/workflows/R-CMD-check/badge.svg)](https://github.com/greta-dev/greta.dynamics/actions)
+  [![R-CMD-check](https://github.com/greta-dev/greta.dynamics/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/greta-dev/greta.dynamics/actions/workflows/R-CMD-check.yaml)
 [![CRAN status](https://www.r-pkg.org/badges/version/greta.dynamics)](https://CRAN.R-project.org/package=greta.dynamics)
   [![codecov.io](https://codecov.io/github/greta-dev/greta.dynamics/coverage.svg?branch=master)](https://app.codecov.io/github/greta-dev/greta.dynamics?branch=master)
 <!-- badges: end -->
