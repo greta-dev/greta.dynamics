@@ -1,0 +1,78 @@
+# greta.dynamics reaches into greta's internals, so a change inside greta can
+# break it with no failing test in either repository: greta-dev/greta.dynamics#45.
+# R-CMD-check.yaml resolves greta from CRAN, so it cannot see that until release.
+# This runs the test suite against greta's development version instead.
+on:
+  push:
+    branches:
+      - main
+      - master
+  schedule:
+    - cron: '0 4 * * Mon'
+  workflow_dispatch:
+
+name: check-greta-dev
+
+defaults:
+  run:
+    shell: Rscript {0}
+
+jobs:
+  check-greta-dev:
+    name: greta-dev, ubuntu-latest, R-release
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+
+    env:
+      R_REMOTES_NO_ERRORS_FROM_WARNINGS: 'true'
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+
+      - uses: actions/checkout@v4
+
+      - uses: r-lib/actions/setup-r@v2
+        id: setup-r
+        with:
+          r-version: 'release'
+          Ncpus: '2L'
+          use-public-rspm: true
+
+      - name: Install remotes
+        run: install.packages("remotes")
+
+      - name: Install system dependencies
+        shell: bash
+        run: |
+          . /etc/os-release
+          while read -r cmd
+          do
+            echo "$cmd"
+            sudo $cmd
+          done < <(Rscript -e "writeLines(remotes::system_requirements('$ID-$VERSION_ID'))")
+
+      - name: Install package + deps
+        run: remotes::install_local(dependencies = TRUE, force = TRUE)
+
+      # after install_local, so this replaces the CRAN greta it pulled in
+      - name: Install greta from main
+        run: remotes::install_github("greta-dev/greta", force = TRUE)
+
+      - name: Install greta deps
+        run: greta::install_greta_deps(timeout = 50)
+
+      - name: Situation Report on greta install
+        run: greta::greta_sitrep()
+
+      - name: Report the greta version under test
+        run: cat("greta:", as.character(packageVersion("greta")), "\n")
+
+      - name: Run tests
+        run: testthat::test_local(reporter = "progress", stop_on_failure = TRUE)
+
+      - name: Session info
+        if: always()
+        run: |
+          options(width = 100)
+          pkgs <- installed.packages()[, "Package"]
+          sessioninfo::session_info(pkgs, include_base = TRUE)

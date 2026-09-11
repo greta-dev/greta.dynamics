@@ -1,3 +1,12 @@
+# greta.dynamics (development version)
+
+## Bug fixes
+
+- Resolved an issue where `iterate_dynamic_function()` and 
+  `iterate_dynamic_matrix()` could not be used in a model sampled with `mcmc()`. 
+  This was a result of greta using `.batch_size` over `batch_size` - see https://github.com/greta-dev/greta/issues/634. We now use `.batch_size`. Tests
+  Added to catch this in the future.
+
 # greta.dynamics 0.2.3
 
 This release restores `greta.dynamics` to CRAN. It was archived in September

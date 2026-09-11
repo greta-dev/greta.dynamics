@@ -285,7 +285,7 @@ tf_iterate_dynamic_function <- function (state,
     # note we need to access the greta stash directly here, rather than including
     # it in internals.R, because otherwise it makes a copy of the environment
     # instead and the contents can't be accessed by greta:::as_tf_function()
-    assign("batch_size",
+    assign(".batch_size",
            batch_size,
            envir = greta::.internals$greta_stash)
 

@@ -256,3 +256,43 @@ test_that("single iteration works", {
 #   expect_s3_class(draws, "mcmc.list")
 #
 # })
+
+test_that("iteration works in mcmc when the states feed a likelihood", {
+  skip_if_not(check_tf_version())
+  set.seed(2026 - 09 - 08)
+
+  n <- 4
+  base <- base_matrix(n)
+  fec_mask <- matrix(0, n, n)
+  fec_mask[1, n] <- 1
+  init <- rep(1, n)
+  niter <- 10
+
+  fun <- function(state, iter, base_matrix, fec_mask, K) {
+    Nt <- sum(state)
+    ratio <- exp(1 - Nt / K)
+    multiplier <- 1 + fec_mask * (ratio - 1)
+    base_matrix * multiplier
+  }
+
+  K <- lognormal(log(100), 0.1)
+
+  iterates <- iterate_dynamic_matrix(
+    matrix_function = fun,
+    initial_state = init,
+    niter = niter,
+    tol = 0,
+    base_matrix = base,
+    fec_mask = fec_mask,
+    K = K
+  )
+
+  final <- iterates$all_states[, niter]
+  dim(final) <- c(n, 1)
+  y <- as.matrix(rpois(n, 5))
+  distribution(y) <- poisson(final)
+
+  m <- model(K)
+  draws <- mcmc(m, chains = 1, warmup = 10, n_samples = 10, verbose = FALSE)
+  expect_s3_class(draws, "mcmc.list")
+})

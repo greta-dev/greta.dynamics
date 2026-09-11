@@ -116,3 +116,40 @@ test_that("iteration works with time-varying parameters", {
   expect_true(all(difference < test_tol))
 
 })
+
+test_that("iteration works in mcmc when the states feed a likelihood", {
+  skip_if_not(check_tf_version())
+  set.seed(2026 - 09 - 08)
+
+  n_cells <- 5
+  n_types <- 2
+  n_times <- 4
+
+  transition <- function(state, iter, w) {
+    q <- state
+    q / (q + (1 - q) * w)
+  }
+
+  initial_state <- ilogit(normal(0, 1, dim = c(n_cells, n_types)))
+  dim(initial_state) <- c(n_cells, n_types, 1)
+
+  w <- 1 + exp(normal(0, 1, dim = c(n_cells, n_types)))
+  dim(w) <- c(n_cells, n_types, 1)
+
+  iterated <- iterate_dynamic_function(
+    transition_function = transition,
+    initial_state = initial_state,
+    niter = n_times,
+    w = w,
+    tol = 0
+  )
+
+  p <- iterated$all_states[, 1, n_times]
+  dim(p) <- c(n_cells, 1)
+  y <- as.matrix(rbinom(n_cells, 50, 0.6))
+  distribution(y) <- binomial(50, p)
+
+  m <- model(p)
+  draws <- mcmc(m, chains = 1, warmup = 10, n_samples = 10, verbose = FALSE)
+  expect_s3_class(draws, "mcmc.list")
+})
